@@ -23,15 +23,51 @@ Python decorator and command to automate deprecating components
 * Documentation: https://auto-deprecator.readthedocs.io.
 
 
-Features
+How does it work?
 --------
 
-* TODO
+We believe that deprecating a component in your library should work in the following ways
 
-Credits
--------
+1. Alert the users the deprecation time
 
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+When the user calls the methods or initializes the objects when will be deprecated 
+in the next version or on an expected date, the user should receive the warning of
+the future deprecation but get the return in success.
 
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+.. code-block:: python
+
+  from auto_deprecator import deprecate
+
+  @deprecate(version='2.0.0')
+  def old_hello_world():
+      return print("Hello world!")
+
+.. code-block:: python
+
+  >>> old_hello_world()
+  Hello world!
+  DeprecationWarning: The function "old_hello_world" will be deprecated in version 2.0.0
+
+
+2. Test as if deprecated
+
+Before the component is deprecated, unit / integration testing should be run
+to ensure the deprecation does not break the existing flow. Pass in the environment
+variables in the testing to simulate that the version is deployed.
+
+.. code-block:: console
+
+  (bash) hello-world-app
+  Hello world!
+  DeprecationWarning: The function "old_hello_world" will be deprecated in version 2.0.0
+   
+.. code-block:: console
+
+  (bash) DEPRECATED_VERSION=2.0.0 hello-world-app
+  Traceback (most recent call last):
+   ...
+  RuntimeError: The function "old_hello_world" is deprecated in version 2.0.0
+ 
+
+3. Automatic deprecation before release
+
