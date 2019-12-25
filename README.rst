@@ -30,7 +30,7 @@ We believe that deprecating a component in your library should work in the follo
 
 1. Alert the users the deprecation time
 
-When the user calls the methods or initializes the objects when will be deprecated 
+When the user calls the methods or initializes the objects which will be deprecated 
 in the next version or on an expected date, the user should receive the warning of
 the future deprecation but get the return in success.
 
