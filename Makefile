@@ -73,6 +73,11 @@ docs: ## generate Sphinx HTML documentation, including API docs
 servedocs: docs ## compile the docs watching for changes
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
+ci_env:
+	virtualenv -p python3 ci_env
+	ci_env/bin/python -m pip install -U pip wheel setuptools
+	ci_env/bin/python -m pip install -e .
+
 release: dist ## package and upload a release
 	twine upload dist/*
 
