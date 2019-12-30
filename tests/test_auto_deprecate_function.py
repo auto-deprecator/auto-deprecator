@@ -45,7 +45,6 @@ def test_auto_deprecate_single_file_2_2_0():
             curr_version='2.2.0')
 
         filestream = open(join(tmpdir, 'function.py'), 'r').read()
-        import ipdb; ipdb.set_trace()
         assert filestream == (
 """def normal_function():
     pass""")

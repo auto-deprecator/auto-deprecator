@@ -38,10 +38,7 @@ def check_body_deprecator_exists(body):
         'in the function "{func}"'.format(
             func=func.name))
 
-    return {
-        kw.arg: kw.value.s
-        for kw in deprecate_list[0].keywords
-    }
+    return deprecate_list[0]
 
 
 def find_deprecated_lines(tree, curr_version, final_lineno):
@@ -49,10 +46,15 @@ def find_deprecated_lines(tree, curr_version, final_lineno):
     deprecated_body = []
 
     for index, body in enumerate(tree.body):
-        deprecator_args = check_body_deprecator_exists(body)
+        deprecate_decorator = check_body_deprecator_exists(body)
 
-        if deprecator_args is None:
+        if deprecate_decorator is None:
             continue
+
+        deprecator_args = {
+            kw.arg: kw.value.s
+            for kw in deprecate_decorator.keywords
+        }
 
         is_deprecated = check_deprecation(
             curr_version=curr_version,
@@ -100,7 +102,7 @@ def deprecate_single_file(filename, curr_version=None):
 
     # Remove the import of the auto_deprecator if no more
     # deprecate decorator is found
-    if not find_deprecated_lines(tree, curr_version, len(filestream) + 1):
+    if all([check_body_deprecator_exists(b) is None for b in tree.body]):
         deprecated_lines += deprecator_import_lines
 
     # Remove the deprecated functions from backward
