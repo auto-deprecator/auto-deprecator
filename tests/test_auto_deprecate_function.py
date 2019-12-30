@@ -10,7 +10,7 @@ from auto_deprecator.cli.auto_deprecate import (
 )
 
 
-def test_deprecate_single_file_2_1_0():
+def test_auto_deprecate_single_file_2_1_0():
     with TemporaryDirectory() as tmpdir:
         test_function_path = pkg_resources.resource_filename(
             'tests.test_project', 'function.py')
@@ -34,7 +34,7 @@ def deprecate_version_2_2_0():
     pass""")
 
 
-def test_deprecate_single_file_2_2_0():
+def test_auto_deprecate_single_file_2_2_0():
     with TemporaryDirectory() as tmpdir:
         test_function_path = pkg_resources.resource_filename(
             'tests.test_project', 'function.py')
@@ -45,9 +45,7 @@ def test_deprecate_single_file_2_2_0():
             curr_version='2.2.0')
 
         filestream = open(join(tmpdir, 'function.py'), 'r').read()
+        import ipdb; ipdb.set_trace()
         assert filestream == (
-"""from auto_deprecator import deprecate
-
-
-def normal_function():
+"""def normal_function():
     pass""")
