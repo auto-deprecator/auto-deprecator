@@ -5,7 +5,7 @@ import click
 from auto_deprecator.deprecate import check_deprecation
 
 
-def check_import_deprecator_exists(tree, final_lineno):
+def check_import_deprecator_exists(tree, last_lineno):
     import_deprecator_lines = []
 
     for index, body in enumerate(tree.body):
@@ -16,7 +16,7 @@ def check_import_deprecator_exists(tree, final_lineno):
             if index != len(tree.body) - 1:
                 end_lineno = tree.body[index + 1].lineno
             else:
-                end_lineno = final_lineno
+                end_lineno = last_lineno
 
             import_deprecator_lines.append((start_lineno, end_lineno))
 
@@ -41,11 +41,37 @@ def check_body_deprecator_exists(body):
     return deprecate_list[0]
 
 
-def find_deprecated_lines(tree, curr_version, final_lineno):
+def check_tree_deprecator_exists(tree):
+    for body in tree.body:
+        if isinstance(body, ast.ClassDef):
+            if check_tree_deprecator_exists(body):
+                return True
+
+        if check_body_deprecator_exists(body):
+            return True
+
+    return False
+
+
+def find_deprecated_lines(tree, curr_version, begin_lineno, last_lineno):
     deprecated_lines = []
     deprecated_body = []
 
     for index, body in enumerate(tree.body):
+        start_lineno = body.lineno
+
+        if index != len(tree.body) - 1:
+            end_lineno = tree.body[index + 1].lineno
+        else:
+            end_lineno = last_lineno
+
+        if isinstance(body, ast.ClassDef):
+            deprecated_lines += find_deprecated_lines(
+                body, curr_version, start_lineno, last_lineno)
+
+            if len(body.body) == 0:
+                deprecated_body.append(body)
+
         deprecate_decorator = check_body_deprecator_exists(body)
 
         if deprecate_decorator is None:
@@ -63,19 +89,16 @@ def find_deprecated_lines(tree, curr_version, final_lineno):
         if not is_deprecated:
             continue
 
-        start_lineno = body.lineno
-
-        if index != len(tree.body) - 1:
-            end_lineno = tree.body[index + 1].lineno
-        else:
-            end_lineno = final_lineno
-
         deprecated_lines.append((start_lineno, end_lineno))
         deprecated_body.append(body)
 
     # Remove the deprecated body from the tree
     for body in deprecated_body:
         tree.body.remove(body)
+
+    # If no element is found in the body, remove the whole tree
+    if len(tree.body) == 0:
+        deprecated_lines = [(begin_lineno, last_lineno)]
 
     return deprecated_lines
 
@@ -95,14 +118,14 @@ def deprecate_single_file(filename, curr_version=None):
     # Store the deprecated funcion line numbers. The tuple
     # is combined by the start and end line index
     deprecated_lines = find_deprecated_lines(
-        tree, curr_version, len(filestream) + 1)
+        tree, curr_version, 1, len(filestream) + 1)
 
     if not deprecated_lines:
         return False
 
     # Remove the import of the auto_deprecator if no more
     # deprecate decorator is found
-    if all([check_body_deprecator_exists(b) is None for b in tree.body]):
+    if not check_tree_deprecator_exists(tree):
         deprecated_lines += deprecator_import_lines
 
     # Remove the deprecated functions from backward
