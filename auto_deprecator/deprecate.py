@@ -64,9 +64,9 @@ def get_curr_date():
     return datetime.now()
 
 
-def check_deprecation(func, version=None, date=None):
+def check_deprecation(func=None, version=None, date=None, curr_version=None):
     if version is not None:
-        curr_version = get_curr_version(func)
+        curr_version = curr_version or get_curr_version(func)
 
         if curr_version >= version:
             return True

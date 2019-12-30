@@ -23,6 +23,8 @@ export PRINT_HELP_PYSCRIPT
 
 BROWSER := python -c "$$BROWSER_PYSCRIPT"
 
+PYTEST_OPTS := 
+
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
@@ -51,7 +53,7 @@ lint: ## check style with flake8
 	flake8 auto_deprecator tests
 
 test: ## run tests quickly with the default Python
-	pytest
+	pytest $(PYTEST_OPTS)
 
 test-all: ## run tests on every Python version with tox
 	tox
