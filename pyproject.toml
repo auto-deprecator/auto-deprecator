@@ -1,0 +1,55 @@
+[project]
+name = "auto-deprecator"
+version = "0.1.0"
+description = "Python decorator and command to automate deprecating components"
+authors = [
+    "Gavin Chan <gavincyi@gmail.com>"
+]
+license = "MIT"
+readme = "README.md"
+python = "3"
+homepage = "https://github.com/gavincyi/auto-deprecator"
+repository = "https://github.com/gavincyi/auto-deprecator"
+documentation = "https://github.com/MartinThoma/infer_pyproject"
+
+keywords = ["packaging", "dependency", "infer", "pyproject.toml"]
+
+classifiers = [
+    "Topic :: Software Development"
+]
+
+# Requirements
+[dependencies]
+docopt = "0.6.2"
+
+[dev-dependencies]
+black = "19.10b0"
+
+[build-system]
+requires = [
+    "setuptools >= 35.0.2",
+    "setuptools_scm >= 2.0.0, <3"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 79
+target_version = ['py36']
+include = '\.pyi?$'
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+)
+'''
