@@ -99,7 +99,7 @@ def find_deprecated_lines(tree, deprecate_version, begin_lineno, last_lineno):
         }
 
         is_deprecated = check_deprecation(
-            deprecate_version=deprecate_version, **deprecator_args
+            curr_version=deprecate_version, **deprecator_args
         )
 
         if not is_deprecated:
