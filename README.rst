@@ -78,7 +78,7 @@ version.
 .. code-block:: console
 
   (bash) auto-deprecate hello-world.py --deprecate-version 2.0.0
-  (bash) git diff
+  (bash) git statu
 
   diff --git a/hello-world.py b/hello-world.py
   index 201e546..ec41365 100644
@@ -88,9 +88,9 @@ version.
   -from auto_deprecator import deprecate
   -
    def hello_world():
-        return print("Hello world!")
-        -
-        -@deprecate(version='2.0.0')
-        -def old_hello_world():
-        -    return print("Hello world!")
+       return print("Hello world!")
+  -
+  -@deprecate(version='2.0.0')
+  -def old_hello_world():
+  -    return print("Hello world!")
   
