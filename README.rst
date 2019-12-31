@@ -6,7 +6,7 @@ Auto deprecator
 .. image:: https://img.shields.io/pypi/v/auto_deprecator.svg
         :target: https://pypi.python.org/pypi/auto-deprecator
 
-.. image:: https://img.shields.io/travis/gavincyi/auto_deprecator.svg
+.. image:: https://travis-ci.org/gavincyi/auto-deprecator.svg
         :target: https://travis-ci.org/gavincyi/auto-deprecator
 
 .. image:: https://readthedocs.org/projects/auto-deprecator/badge/?version=latest
