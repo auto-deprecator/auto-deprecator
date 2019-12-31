@@ -11,7 +11,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'click',
+    'docopt',
 ]
 
 setup_requirements = ['pytest-runner', ]

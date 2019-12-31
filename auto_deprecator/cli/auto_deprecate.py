@@ -1,8 +1,21 @@
-import ast
+"""Auto deprecate.
 
-import click
+Usage:
+    auto-deprecate <PATH> [options]
+
+Options:
+    --deprecate-version=<VER>     Package version to deprecate in the
+                                  path. (Optional)
+    -v,--version                  Show this version.
+    -h,--help                     Help.
+"""
+import ast
+from os.path import isfile
+
+from docopt import docopt
 
 from auto_deprecator.deprecate import check_deprecation
+from auto_deprecator import __version__
 
 
 def check_import_deprecator_exists(tree, last_lineno):
@@ -146,16 +159,10 @@ def deprecate_single_file(filename, curr_version=None):
     return True
 
 
-@click.command()
-@click.option(
-    '--filename',
-    default=None,
-    help='Python file name which includes the deprecated functions')
-@click.option(
-    '--curr-version',
-    default=None,
-    help='Current file or package version. If not provided, the '
-         'current versions is derived from the package.')
-def main(filename, curr_version):
-    if filename is not None:
-        deprecate_single_file(filename, curr_version)
+def main():
+    args = docopt(__doc__, version=__version__)
+    path = args['<PATH>']
+    deprecate_version = args['--deprecate-version']
+
+    if isfile(path):
+        deprecate_single_file(path, deprecate_version)
