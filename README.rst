@@ -4,10 +4,10 @@ Auto deprecator
 
 
 .. image:: https://img.shields.io/pypi/v/auto_deprecator.svg
-        :target: https://pypi.python.org/pypi/auto_deprecator
+        :target: https://pypi.python.org/pypi/auto-deprecator
 
 .. image:: https://img.shields.io/travis/gavincyi/auto_deprecator.svg
-        :target: https://travis-ci.org/gavincyi/auto_deprecator
+        :target: https://travis-ci.org/gavincyi/auto-deprecator
 
 .. image:: https://readthedocs.org/projects/auto-deprecator/badge/?version=latest
         :target: https://auto-deprecator.readthedocs.io/en/latest/?badge=latest
@@ -71,3 +71,26 @@ variables in the testing to simulate that the version is deployed.
 
 3. Automatic deprecation before release
 
+Deprecating the functions is no longer a manual work. Every time before release,
+run the command `auto-deprecate` to remove the functions deprecated in the coming
+version.
+
+.. code-block:: console
+
+  (bash) auto-deprecate hello-world.py --deprecate-version 2.0.0
+  (bash) git diff
+
+  diff --git a/hello-world.py b/hello-world.py
+  index 201e546..ec41365 100644
+  --- a/hello-world.py
+  +++ b/hello-world.py
+  @@ -1,8 +1,2 @@
+  -from auto_deprecator import deprecate
+  -
+   def hello_world():
+        return print("Hello world!")
+        -
+        -@deprecate(version='2.0.0')
+        -def old_hello_world():
+        -    return print("Hello world!")
+  
