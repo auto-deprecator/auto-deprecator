@@ -1,4 +1,5 @@
 """Main module."""
+from os import environ
 from datetime import datetime
 from importlib import import_module
 from warnings import warn
@@ -35,6 +36,9 @@ def deprecate(version=None, date=None):
 
 
 def get_curr_version(func):
+    if 'DEPRECATE_VERSION' in environ:
+        return environ['DEPRECATE_VERSION']
+
     module = ""
     imported_module = func.__module__
 
@@ -56,6 +60,9 @@ def get_curr_version(func):
 
 
 def get_curr_date():
+    if 'DEPRECATE_DATE' in environ:
+        return datetime.strptime('DEPRECATE_DATE', '%Y-%m-%d')
+
     return datetime.now()
 
 

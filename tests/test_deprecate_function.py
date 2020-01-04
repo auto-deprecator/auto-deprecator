@@ -1,6 +1,6 @@
 import pytest
 
-from tests.test_project import function
+from tests.test_project import function_version as function
 
 
 def test_deprecate_version_2_0_0():
