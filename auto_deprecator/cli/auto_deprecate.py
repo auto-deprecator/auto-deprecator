@@ -105,9 +105,10 @@ def find_deprecated_lines(tree, deprecate_version, begin_lineno, last_lineno):
             kw.arg: kw.value.s for kw in deprecate_decorator.keywords
         }
 
-        is_deprecated = check_deprecation(
-            curr_version=deprecate_version, **deprecator_args
-        )
+        if deprecate_version:
+            deprecator_args['curr_version'] = deprecate_version
+
+        is_deprecated = check_deprecation(**deprecator_args)
 
         if not is_deprecated:
             continue
