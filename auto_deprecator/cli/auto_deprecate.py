@@ -71,7 +71,7 @@ def check_tree_deprecator_exists(tree):
 
 def find_deprecated_lines(tree, deprecate_version, begin_lineno, last_lineno):
     def get_function_lineno(body):
-        if hasattr(body, 'decorator_list') and len(body.decorator_list) > 0:
+        if hasattr(body, "decorator_list") and len(body.decorator_list) > 0:
             return body.decorator_list[0].lineno
         else:
             return body.lineno
@@ -84,7 +84,7 @@ def find_deprecated_lines(tree, deprecate_version, begin_lineno, last_lineno):
         start_lineno = get_function_lineno(body)
 
         if index != len(tree.body) - 1:
-            end_lineno = get_function_lineno(tree.body[index+1])
+            end_lineno = get_function_lineno(tree.body[index + 1])
         else:
             end_lineno = last_lineno
 

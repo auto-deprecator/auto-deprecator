@@ -1,32 +1,27 @@
 """Main module."""
 from os import environ
-from datetime import datetime
 from importlib import import_module
 from warnings import warn
 
 
-def deprecate(version=None, date=None):
-    assert not ((version is not None) and (date is not None)), (
-        'Only version "{version}" and date "{date}" should be ' "provided"
-    ).format(version=version, date=date)
-
+def deprecate(version=None, curr_version=None):
     def _deprecate(func):
         def wrapper(*args, **kwargs):
             # Check whether the function is deprecated
             is_deprecated = check_deprecation(
-                func=func, version=version, date=date
+                func=func, version=version, curr_version=curr_version,
             )
 
             # Throw exception if deprecation
             if is_deprecated:
-                handle_deprecation(func=func, version=version, date=date)
+                handle_deprecation(func=func, version=version)
 
             # Run the function
             result = func(*args, **kwargs)
 
             # Alert the user that the function will be
             # deprecated
-            alert_future_deprecation(func=func, version=version, date=date)
+            alert_future_deprecation(func=func, version=version)
 
             return result
 
@@ -35,9 +30,12 @@ def deprecate(version=None, date=None):
     return _deprecate
 
 
-def get_curr_version(func):
-    if 'DEPRECATE_VERSION' in environ:
-        return environ['DEPRECATE_VERSION']
+def get_curr_version(func, curr_version):
+    if "DEPRECATE_VERSION" in environ:
+        return environ["DEPRECATE_VERSION"]
+
+    if curr_version:
+        return curr_version
 
     module = ""
     imported_module = func.__module__
@@ -59,30 +57,17 @@ def get_curr_version(func):
     )
 
 
-def get_curr_date():
-    if 'DEPRECATE_DATE' in environ:
-        return datetime.strptime('DEPRECATE_DATE', '%Y-%m-%d')
-
-    return datetime.now()
-
-
-def check_deprecation(func=None, version=None, date=None, curr_version=None):
+def check_deprecation(func=None, version=None, curr_version=None):
     if version is not None:
-        curr_version = curr_version or get_curr_version(func)
+        curr_version = get_curr_version(func, curr_version)
 
         if curr_version >= version:
-            return True
-
-    if date is not None:
-        curr_date = get_curr_date()
-
-        if curr_date >= datetime.strptime(date, "%Y-%m-%d"):
             return True
 
     return False
 
 
-def handle_deprecation(func, version=None, date=None):
+def handle_deprecation(func, version=None):
     err_msg = 'Function "{func}" is deprecated since '.format(
         func=func.__name__
     )
@@ -90,21 +75,15 @@ def handle_deprecation(func, version=None, date=None):
     if version is not None:
         err_msg += "version {version}".format(version=version)
 
-    if date is not None:
-        err_msg += "date {date}".format(date=date)
-
     raise RuntimeError(err_msg)
 
 
-def alert_future_deprecation(func, version=None, date=None):
+def alert_future_deprecation(func, version=None):
     warning_msg = 'Function "{func}" will be deprecated on '.format(
         func=func.__name__
     )
 
     if version is not None:
         warning_msg += "version {version}".format(version=version)
-
-    if date is not None:
-        warning_msg += "date {date}".format(date=date)
 
     warn(warning_msg, DeprecationWarning)
