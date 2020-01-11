@@ -20,7 +20,7 @@ def test_auto_deprecate_single_file_2_1_0(filename):
         shutil.copyfile(filename, join(tmpdir, "function.py"))
 
         deprecate_single_file(
-            filename=join(tmpdir, "function.py"), deprecate_version="2.1.0"
+            filename=join(tmpdir, "function.py"), current="2.1.0"
         )
 
         filestream = open(join(tmpdir, "function.py"), "r").read()
@@ -32,7 +32,7 @@ def normal_function():
     pass
 
 
-@deprecate(version="2.2.0")
+@deprecate("2.2.0")
 def deprecate_version_2_2_0():
     pass"""
         )
@@ -43,7 +43,7 @@ def test_auto_deprecate_single_file_2_2_0(filename):
         shutil.copyfile(filename, join(tmpdir, "function.py"))
 
         deprecate_single_file(
-            filename=join(tmpdir, "function.py"), deprecate_version="2.2.0"
+            filename=join(tmpdir, "function.py"), current="2.2.0"
         )
 
         filestream = open(join(tmpdir, "function.py"), "r").read()
