@@ -38,7 +38,7 @@ the future deprecation but get the return in success.
 
   from auto_deprecator import deprecate
 
-  @deprecate(version='2.0.0')
+  @deprecate(expiry='2.0.0')
   def old_hello_world():
       return print("Hello world!")
 
@@ -77,7 +77,7 @@ version.
 
 .. code-block:: console
 
-  (bash) auto-deprecate hello-world.py --deprecate-version 2.0.0
+  (bash) auto-deprecate hello-world.py --current-version 2.0.0
   (bash) git statu
 
   diff --git a/hello-world.py b/hello-world.py
@@ -90,7 +90,7 @@ version.
    def hello_world():
        return print("Hello world!")
   -
-  -@deprecate(version='2.0.0')
+  -@deprecate(expiry='2.0.0')
   -def old_hello_world():
   -    return print("Hello world!")
   
