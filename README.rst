@@ -78,7 +78,7 @@ version.
 .. code-block:: console
 
   (bash) auto-deprecate hello-world.py --current-version 2.0.0
-  (bash) git statu
+  (bash) git diff
 
   diff --git a/hello-world.py b/hello-world.py
   index 201e546..ec41365 100644

@@ -184,7 +184,7 @@ def deprecate_single_file(filename, current=None):
 
 
 def deprecate_directory(path, current):
-    pass
+    raise NotImplementedError("Deprecate path does not support directory now")
 
 
 def main():
