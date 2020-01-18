@@ -1,9 +1,7 @@
 import pytest
 
-from tests.test_project.dummy_class import DummyClass
 
-
-def test_deprecate_version_2_0_0():
+def test_deprecate_version_2_0_0(DummyClass):
     with pytest.raises(RuntimeError) as err:
         obj = DummyClass()
         obj.deprecate_version_2_0_0()
@@ -14,7 +12,7 @@ def test_deprecate_version_2_0_0():
     ) in str(err)
 
 
-def test_deprecate_version_2_1_0():
+def test_deprecate_version_2_1_0(DummyClass):
     with pytest.raises(RuntimeError) as err:
         obj = DummyClass()
         obj.deprecate_version_2_1_0()
@@ -25,7 +23,7 @@ def test_deprecate_version_2_1_0():
     ) in str(err)
 
 
-def test_deprecate_version_2_2_0():
+def test_deprecate_version_2_2_0(DummyClass):
     with pytest.warns(DeprecationWarning) as warning:
         obj = DummyClass()
         obj.deprecate_version_2_2_0()

@@ -1,11 +1,9 @@
 import pytest
 
-from tests.test_project import function_version as function
 
-
-def test_deprecate_version_2_0_0():
+def test_deprecate_version_2_0_0(function_module):
     with pytest.raises(RuntimeError) as err:
-        function.deprecate_version_2_0_0()
+        function_module.deprecate_version_2_0_0()
 
     assert (
         'Function "deprecate_version_2_0_0" is '
@@ -13,9 +11,9 @@ def test_deprecate_version_2_0_0():
     ) in str(err)
 
 
-def test_deprecate_version_2_1_0():
+def test_deprecate_version_2_1_0(function_module):
     with pytest.raises(RuntimeError) as err:
-        function.deprecate_version_2_1_0()
+        function_module.deprecate_version_2_1_0()
 
     assert (
         'Function "deprecate_version_2_1_0" is '
@@ -23,9 +21,9 @@ def test_deprecate_version_2_1_0():
     ) in str(err)
 
 
-def test_deprecate_version_2_2_0():
+def test_deprecate_version_2_2_0(function_module):
     with pytest.warns(DeprecationWarning) as warning:
-        function.deprecate_version_2_2_0()
+        function_module.deprecate_version_2_2_0()
 
     assert (
         'Function "deprecate_version_2_2_0" will '
