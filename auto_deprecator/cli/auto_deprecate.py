@@ -1,20 +1,8 @@
-"""Auto deprecate.
-
-Usage:
-    auto-deprecate <PATH> [options]
-
-Options:
-    --current-version=<VER>       Current version to deprecate in the path.
-    -v,--version                  Show this version.
-    -h,--help                     Help.
-"""
+import argparse
 import ast
 from os.path import isfile
 
-from docopt import docopt
-
 from auto_deprecator.deprecate import check_deprecation
-from auto_deprecator import __version__
 
 
 def check_import_deprecator_exists(tree, last_lineno):
@@ -188,9 +176,18 @@ def deprecate_directory(path, current):
 
 
 def main():
-    args = docopt(__doc__, version=__version__)
-    path = args["<PATH>"]
-    current = args["--current-version"]
+    parser = argparse.ArgumentParser(
+        description="Automatical removal of deprecated source code."
+    )
+    parser.add_argument("PATH", type=str, help="The source code path.")
+    parser.add_argument(
+        "--version", dest="current", type=str, help="Current package version."
+    )
+    args = parser.parse_args()
+
+    # Get the argument values
+    path = args.path
+    current = args.current
 
     if isfile(path):
         deprecate_single_file(path, current)
