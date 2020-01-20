@@ -49,7 +49,7 @@ setup(
     tests_require=test_requirements,
     extras_require={"test": test_requirements,},
     url="https://github.com/gavincyi/auto_deprecator",
-    version="2020.1.1",
+    version="2020.1.2",
     zip_safe=False,
     entry_points="""
         [console_scripts]
