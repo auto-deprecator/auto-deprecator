@@ -5,6 +5,7 @@ from .conftest import (
     CLASS_DELARATION,
     INIT_METHOD,
     DEPRECATE_2_2_0,
+    DEPRECATE_2_2_0_PROPERTY,
     INNER_CLASS,
 )
 
@@ -18,6 +19,7 @@ def test_auto_deprecate_single_file_2_1_0(dummy_class_file):
         + CLASS_DELARATION
         + INIT_METHOD
         + DEPRECATE_2_2_0
+        + DEPRECATE_2_2_0_PROPERTY
         + INNER_CLASS
     )
 

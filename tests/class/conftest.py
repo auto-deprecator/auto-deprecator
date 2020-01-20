@@ -34,6 +34,12 @@ DEPRECATE_2_2_0 = r"""
     def deprecate_version_2_2_0(self):
         pass"""
 
+DEPRECATE_2_2_0_PROPERTY = r"""
+
+    @deprecate(expiry="2.2.0", current="2.1.0")
+    def deprecate_property_2_2_0(self):
+        return 1"""
+
 INNER_CLASS = r"""
 
     class DummyClass2:
@@ -51,6 +57,7 @@ def dummy_class():
         + DEPRECATE_2_0_0
         + DEPRECATE_2_1_0
         + DEPRECATE_2_2_0
+        + DEPRECATE_2_2_0_PROPERTY
         + INNER_CLASS
     )
 
