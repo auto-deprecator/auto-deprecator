@@ -6,7 +6,7 @@ Auto deprecator
 .. image:: https://img.shields.io/pypi/v/auto_deprecator.svg
         :target: https://pypi.python.org/pypi/auto-deprecator
 
-.. image:: https://img.shields.io/travis/gavincyi/auto_deprecator.svg
+.. image:: https://travis-ci.org/gavincyi/auto-deprecator.svg
         :target: https://travis-ci.org/gavincyi/auto-deprecator
 
 .. image:: https://readthedocs.org/projects/auto-deprecator/badge/?version=latest
@@ -38,7 +38,7 @@ the future deprecation but get the return in success.
 
   from auto_deprecator import deprecate
 
-  @deprecate(version='2.0.0')
+  @deprecate(expiry='2.0.0')
   def old_hello_world():
       return print("Hello world!")
 
@@ -77,20 +77,20 @@ version.
 
 .. code-block:: console
 
-  (bash) auto-deprecate hello-world.py --deprecate-version 2.0.0
-  (bash) git statu
+  (bash) auto-deprecate hello_world.py --version 2.0.0
+  (bash) git diff
 
-  diff --git a/hello-world.py b/hello-world.py
+  diff --git a/hello_world.py b/hello_world.py
   index 201e546..ec41365 100644
-  --- a/hello-world.py
-  +++ b/hello-world.py
+  --- a/hello_world.py
+  +++ b/hello_world.py
   @@ -1,8 +1,2 @@
   -from auto_deprecator import deprecate
   -
    def hello_world():
        return print("Hello world!")
   -
-  -@deprecate(version='2.0.0')
+  -@deprecate(expiry='2.0.0')
   -def old_hello_world():
   -    return print("Hello world!")
   

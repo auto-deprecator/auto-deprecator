@@ -1,21 +1,8 @@
-"""Auto deprecate.
-
-Usage:
-    auto-deprecate <PATH> [options]
-
-Options:
-    --deprecate-version=<VER>     Package version to deprecate in the
-                                  path. (Optional)
-    -v,--version                  Show this version.
-    -h,--help                     Help.
-"""
+import argparse
 import ast
 from os.path import isfile
 
-from docopt import docopt
-
 from auto_deprecator.deprecate import check_deprecation
-from auto_deprecator import __version__
 
 
 def check_import_deprecator_exists(tree, last_lineno):
@@ -69,21 +56,28 @@ def check_tree_deprecator_exists(tree):
     return False
 
 
-def find_deprecated_lines(tree, deprecate_version, begin_lineno, last_lineno):
+def find_deprecated_lines(tree, current, begin_lineno, last_lineno):
+    def get_function_lineno(body):
+        if hasattr(body, "decorator_list") and len(body.decorator_list) > 0:
+            return body.decorator_list[0].lineno
+        else:
+            return body.lineno
+
     deprecated_lines = []
     deprecated_body = []
 
     for index, body in enumerate(tree.body):
-        start_lineno = body.lineno
+        # Python 3.8 lineno is on the function rather than the decorator
+        start_lineno = get_function_lineno(body)
 
         if index != len(tree.body) - 1:
-            end_lineno = tree.body[index + 1].lineno
+            end_lineno = get_function_lineno(tree.body[index + 1])
         else:
             end_lineno = last_lineno
 
         if isinstance(body, ast.ClassDef):
             deprecated_lines += find_deprecated_lines(
-                body, deprecate_version, start_lineno, last_lineno
+                body, current, start_lineno, last_lineno
             )
 
             if len(body.body) == 0:
@@ -94,16 +88,28 @@ def find_deprecated_lines(tree, deprecate_version, begin_lineno, last_lineno):
         if deprecate_decorator is None:
             continue
 
-        deprecator_args = {
-            kw.arg: kw.value.s for kw in deprecate_decorator.keywords
-        }
+        keywords = {k.arg: k.value.s for k in deprecate_decorator.keywords}
 
-        is_deprecated = check_deprecation(
-            deprecate_version=deprecate_version, **deprecator_args
+        expiry = (
+            deprecate_decorator.args[0].value
+            if deprecate_decorator.args
+            else keywords["expiry"]
         )
+
+        if current is None:
+            current = (
+                deprecate_decorator.args[1].value
+                if len(deprecate_decorator.args) > 1
+                else keywords["current"]
+            )
+
+        is_deprecated = check_deprecation(expiry=expiry, current=current)
 
         if not is_deprecated:
             continue
+
+        # Readjust the start lineno from the decorator
+        start_lineno = body.decorator_list[0].lineno
 
         deprecated_lines.append((start_lineno, end_lineno))
         deprecated_body.append(body)
@@ -119,7 +125,7 @@ def find_deprecated_lines(tree, deprecate_version, begin_lineno, last_lineno):
     return deprecated_lines
 
 
-def deprecate_single_file(filename, deprecate_version=None):
+def deprecate_single_file(filename, current=None):
     # Read file stream
     filestream = open(filename, "r").readlines()
     tree = ast.parse("".join(filestream))
@@ -135,7 +141,7 @@ def deprecate_single_file(filename, deprecate_version=None):
     # Store the deprecated funcion line numbers. The tuple
     # is combined by the start and end line index
     deprecated_lines = find_deprecated_lines(
-        tree, deprecate_version, 1, len(filestream) + 1
+        tree, current, 1, len(filestream) + 1
     )
 
     if not deprecated_lines:
@@ -165,16 +171,25 @@ def deprecate_single_file(filename, deprecate_version=None):
     return True
 
 
-def deprecate_directory(path, deprecate_version):
-    pass
+def deprecate_directory(path, current):
+    raise NotImplementedError("Deprecate path does not support directory now")
 
 
 def main():
-    args = docopt(__doc__, version=__version__)
-    path = args["<PATH>"]
-    deprecate_version = args["--deprecate-version"]
+    parser = argparse.ArgumentParser(
+        description="Automatical removal of deprecated source code."
+    )
+    parser.add_argument("PATH", type=str, help="The source code path.")
+    parser.add_argument(
+        "--version", dest="current", type=str, help="Current package version."
+    )
+    args = parser.parse_args()
+
+    # Get the argument values
+    path = args.path
+    current = args.current
 
     if isfile(path):
-        deprecate_single_file(path, deprecate_version)
+        deprecate_single_file(path, current)
     else:
-        deprecate_directory(path, deprecate_version)
+        deprecate_directory(path, current)
