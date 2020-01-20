@@ -88,7 +88,7 @@ def find_deprecated_lines(tree, current, begin_lineno, last_lineno):
         if deprecate_decorator is None:
             continue
 
-        keywords = {k.arg: k.value.value for k in deprecate_decorator.keywords}
+        keywords = {k.arg: k.value.s for k in deprecate_decorator.keywords}
 
         expiry = (
             deprecate_decorator.args[0].value
