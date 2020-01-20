@@ -80,11 +80,13 @@ def handle_deprecation(func, expiry=None):
 
 def alert_future_deprecation(func, expiry=None):
     if expiry is None:
-        return
+        version_msg = 'soon'
+    else:
+        version_msg = 'on version {version}'.format(version=expiry)
 
     warn(
-        'Function "{func}" will be deprecated on version {version}'.format(
-            func=func.__name__, version=expiry,
+        'Function "{func}" will be deprecated {version_msg}'.format(
+            func=func.__name__, version_msg=version_msg
         ),
         DeprecationWarning,
     )
