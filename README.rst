@@ -24,7 +24,7 @@ Python decorator and command to automate deprecating components
 
 
 How does it work?
---------
+-----------------
 
 We believe that deprecating a component in your library should work in the following ways
 
