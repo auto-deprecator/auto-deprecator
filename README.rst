@@ -29,6 +29,7 @@ How does it work?
 We believe that deprecating a component in your library should work in the following ways
 
 1. Alert the users the deprecation time
+#######################################
 
 When the user calls the methods or initializes the objects which will be deprecated 
 in the next version or on an expected date, the user should receive the warning of
@@ -50,6 +51,7 @@ the future deprecation but get the return in success.
 
 
 2. Test as if deprecated
+########################
 
 Before the component is deprecated, unit / integration testing should be run
 to ensure the deprecation does not break the existing flow. Pass in the environment
@@ -70,6 +72,7 @@ variables in the testing to simulate that the version is deployed.
  
 
 3. Automatic deprecation before release
+#######################################
 
 Deprecating the functions is no longer a manual work. Every time before release,
 run the command `auto-deprecate` to remove the functions deprecated in the coming
