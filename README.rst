@@ -97,3 +97,54 @@ version.
   -def old_hello_world():
   -    return print("Hello world!")
   
+
+
+Installation
+------------
+
+The library can be easily installed with pip
+
+.. code-block:: console
+
+  pip install auto-deprecator
+
+
+
+Alternative Installation
+------------------------
+
+If the auto-deprecator is included and the functions are
+well deprecated (following the whole cycle mentioned above),
+your software does not need auto-deprecator anymore. For
+developers who are not comfortable to include a library not
+always in use as a dependency, they can just clone the source
+code into your project instead.
+
+For example, your Python project contains a module called
+"utils" to maintain all the utility functions.
+
+.. code-block:: console
+
+  .
+  ├── setup.py
+  └── test_py_project
+      ├── cli.py
+      ├── __init__.py
+      ├── test_py_project.py
+      └── utils
+          └── __init__.py
+
+With the bash command "curl",
+
+.. code-block:: console
+
+  curl -L https://github.com/gavincyi/auto-deprecator/tarball/master | tar xz -C <target_directory> --wildcards "*/auto_deprecator" --strip-components=1
+
+
+the source code of auto-deprecator can be cloned into the
+target directory, i.e. "test_py_project/utils" in the example
+
+.. code-block:: console
+
+  touch test_py_project/utils/__init__.py
+  curl -L https://github.com/gavincyi/auto-deprecator/tarball/master | tar xz -C test_py_project/utils --wildcards "*/auto_deprecator" --strip-components=1
