@@ -4,7 +4,7 @@ from importlib import import_module
 from warnings import warn
 
 
-def deprecate(expiry=None, current=None):
+def deprecate(expiry=None, current=None, relocate=None):
     def _deprecate(func):
         def wrapper(*args, **kwargs):
             # Check whether the function is deprecated
@@ -14,14 +14,16 @@ def deprecate(expiry=None, current=None):
 
             # Throw exception if deprecation
             if is_deprecated:
-                handle_deprecation(func=func, expiry=expiry)
+                handle_deprecation(func=func, expiry=expiry, relocate=relocate)
 
             # Run the function
             result = func(*args, **kwargs)
 
             # Alert the user that the function will be
             # deprecated
-            alert_future_deprecation(func=func, expiry=expiry)
+            alert_future_deprecation(
+                func=func, expiry=expiry, relocate=relocate
+            )
 
             return result
 
@@ -67,26 +69,41 @@ def check_deprecation(func=None, expiry=None, current=None):
     return False
 
 
-def handle_deprecation(func, expiry=None):
+def handle_deprecation(func, expiry=None, relocate=None):
     if expiry is None:
         return
 
-    raise RuntimeError(
-        'Function "{func}" is deprecated since version {version}'.format(
-            func=func.__name__, version=expiry
+    if relocate:
+        hints = ' Please use function / method "{relocate}"'.format(
+            relocate=relocate
         )
+    else:
+        hints = ""
+
+    raise RuntimeError(
+        (
+            'Function "{func}" is deprecated since version {version}.'
+            "{hints}"
+        ).format(func=func.__name__, version=expiry, hints=hints)
     )
 
 
-def alert_future_deprecation(func, expiry=None):
+def alert_future_deprecation(func, expiry=None, relocate=None):
     if expiry is None:
-        version_msg = 'soon'
+        version_msg = "soon"
     else:
-        version_msg = 'on version {version}'.format(version=expiry)
+        version_msg = "on version {version}".format(version=expiry)
+
+    if relocate:
+        hints = ' Please use function / method "{relocate}"'.format(
+            relocate=relocate
+        )
+    else:
+        hints = ""
 
     warn(
-        'Function "{func}" will be deprecated {version_msg}'.format(
-            func=func.__name__, version_msg=version_msg
+        'Function "{func}" will be deprecated {version_msg}.{hints}'.format(
+            func=func.__name__, version_msg=version_msg, hints=hints
         ),
         DeprecationWarning,
     )
