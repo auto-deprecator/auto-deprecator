@@ -41,4 +41,3 @@ def test_deprecate_version_2_2_0(DummyClass):
         'Function "deprecate_property_2_2_0" will '
         "be deprecated on version 2.2.0"
     ) in warning[0].message.args[0]
-

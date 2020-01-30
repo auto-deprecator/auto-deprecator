@@ -14,10 +14,7 @@ def deprecate(expiry=None, current=None, relocate=None):
 
             # Throw exception if deprecation
             if is_deprecated:
-                handle_deprecation(
-                    func=func,
-                    expiry=expiry,
-                    relocate=relocate)
+                handle_deprecation(func=func, expiry=expiry, relocate=relocate)
 
             # Run the function
             result = func(*args, **kwargs)
@@ -25,9 +22,8 @@ def deprecate(expiry=None, current=None, relocate=None):
             # Alert the user that the function will be
             # deprecated
             alert_future_deprecation(
-                func=func,
-                expiry=expiry,
-                relocate=relocate)
+                func=func, expiry=expiry, relocate=relocate
+            )
 
             return result
 
@@ -82,28 +78,28 @@ def handle_deprecation(func, expiry=None, relocate=None):
             relocate=relocate
         )
     else:
-        hints = ''
+        hints = ""
 
     raise RuntimeError(
-        ('Function "{func}" is deprecated since version {version}.'
-         '{hints}').format(
-            func=func.__name__, version=expiry, hints=hints
-        )
+        (
+            'Function "{func}" is deprecated since version {version}.'
+            "{hints}"
+        ).format(func=func.__name__, version=expiry, hints=hints)
     )
 
 
 def alert_future_deprecation(func, expiry=None, relocate=None):
     if expiry is None:
-        version_msg = 'soon'
+        version_msg = "soon"
     else:
-        version_msg = 'on version {version}'.format(version=expiry)
+        version_msg = "on version {version}".format(version=expiry)
 
     if relocate:
         hints = ' Please use function / method "{relocate}"'.format(
             relocate=relocate
         )
     else:
-        hints = ''
+        hints = ""
 
     warn(
         'Function "{func}" will be deprecated {version_msg}.{hints}'.format(

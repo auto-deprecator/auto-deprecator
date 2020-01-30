@@ -13,6 +13,5 @@ def test_no_error_simple_deprecate():
         simple_deprecate()
 
     assert (
-        'Function "simple_deprecate" will '
-        "be deprecated soon"
+        'Function "simple_deprecate" will ' "be deprecated soon"
     ) in warning[0].message.args[0]

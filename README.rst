@@ -47,7 +47,7 @@ the future deprecation but get the return in success.
 
   >>> old_hello_world()
   Hello world!
-  DeprecationWarning: The function "old_hello_world" will be deprecated in version 2.0.0
+  DeprecationWarning: The function "old_hello_world" will be deprecated on version 2.0.0
 
 
 2. Test as if deprecated
@@ -148,3 +148,26 @@ target directory, i.e. "test_py_project/utils" in the example
 
   touch test_py_project/utils/__init__.py
   curl -L https://github.com/gavincyi/auto-deprecator/tarball/master | tar xz -C test_py_project/utils --wildcards "*/auto_deprecator" --strip-components=1
+
+
+Features
+--------
+
+Provide hints to users
+######################
+
+Provide the parameter "relocate", the warning / error message will inform the user about 
+the relocated method.
+
+.. code-block:: python
+
+  @deprecate(expiry='2.1.0', current='2.0.0', relocate='new_compute_method')
+  def compute_method():
+      return 'hello world'
+
+.. code-block:: python
+
+  >>> old_hello_world()
+  Hello world!
+  DeprecationWarning: The function "old_hello_world" will be deprecated on version 2.0.0..
+                      Please use method / function "new_compute_method".
