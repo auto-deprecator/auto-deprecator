@@ -13,11 +13,10 @@ Auto deprecator
         :target: https://auto-deprecator.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://img.shields.io/pypi/dm/auto-deprecator.svg
 
 
-
-Python decorator and command to automate deprecating components
-
+Development cycle to deprecate in Python
 
 * Free software: MIT license
 * Documentation: https://auto-deprecator.readthedocs.io.
