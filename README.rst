@@ -16,7 +16,7 @@ Auto deprecator
 .. image:: https://img.shields.io/pypi/dm/auto-deprecator.svg
 
 
-Development cycle to deprecate in Python
+Deprecation toolkit in Python
 
 * Free software: MIT license
 * Documentation: https://auto-deprecator.readthedocs.io.
