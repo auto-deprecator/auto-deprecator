@@ -5,6 +5,21 @@ from warnings import warn
 
 
 def deprecate(expiry=None, current=None, relocate=None):
+    """Deprecate
+
+    This is a function decorator which
+
+      1. If the current version is before the expiry version, by deafult,
+         a deprecation warning is raised.
+
+      2. If the current version is same as or after the expiry version, by
+         default, an exception is raised.
+
+    :param expiry: `str` The expiry version.
+    :param current: `str` The current version.
+    :param relocate: `str` The relocated method or function name, which will
+        be hinted if warning or exception is raised.
+    """
     def _deprecate(func):
         def wrapper(*args, **kwargs):
             # Check whether the function is deprecated
