@@ -3,7 +3,7 @@
 
 __author__ = """Gavin Chan"""
 __email__ = "gavincyi@gmail.com"
-__version__ = "2020.1.3"
+__version__ = "2020.2.0"
 
 from .deprecate import (
     deprecate,

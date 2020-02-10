@@ -9,7 +9,7 @@ def test_deprecate_version_2_0_0_with_1_9_0(function_module):
     with pytest.warns(DeprecationWarning) as warning:
         function_module.deprecate_version_2_0_0()
 
-    environ["DEPRECATE_VERSION"] = ""
+    del environ["DEPRECATE_VERSION"]
 
     assert (
         'Function "deprecate_version_2_0_0" will '
@@ -23,7 +23,7 @@ def test_deprecate_version_2_0_0_with_2_1_0(function_module):
     with pytest.raises(RuntimeError) as err:
         function_module.deprecate_version_2_0_0()
 
-    environ["DEPRECATE_VERSION"] = ""
+    del environ["DEPRECATE_VERSION"]
 
     assert (
         'Function "deprecate_version_2_0_0" is '

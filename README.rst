@@ -13,11 +13,10 @@ Auto deprecator
         :target: https://auto-deprecator.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://img.shields.io/pypi/dm/auto-deprecator.svg
 
 
-
-Python decorator and command to automate deprecating components
-
+Deprecation toolkit in Python
 
 * Free software: MIT license
 * Documentation: https://auto-deprecator.readthedocs.io.
@@ -26,7 +25,7 @@ Python decorator and command to automate deprecating components
 How does it work?
 -----------------
 
-We believe that deprecating a component in your library should work in the following ways
+The library provides the full cycle to deprecate a function in the following ways
 
 1. Alert the users the deprecation time
 #######################################
@@ -39,7 +38,7 @@ the future deprecation but get the return in success.
 
   from auto_deprecator import deprecate
 
-  @deprecate(expiry='2.0.0')
+  @deprecate(expiry='2.0.0', current='1.9.0')
   def old_hello_world():
       return print("Hello world!")
 
@@ -171,3 +170,29 @@ the relocated method.
   Hello world!
   DeprecationWarning: The function "old_hello_world" will be deprecated on version 2.0.0..
                       Please use method / function "new_compute_method".
+
+
+Import current version from module name
+#######################################
+
+Instead of importing the version (`__version__`) in the module,
+
+.. code-block:: python
+
+  from your_package import __version__
+
+  @deprecate(expiry='2.1.0', current=__version__)
+  def compute_method():
+      return 'hello world'
+
+specifying the module name, which includes the version attribute, can
+help maintain the source code in a clean manner.
+
+.. code-block:: python
+
+  @deprecate(expiry='2.1.0', version_module='your_package')
+  def compute_method():
+      return 'hello world'
+
+Especially if the function is removed by the action `auto-deprecate`,
+the unused import will not be left in the module.
