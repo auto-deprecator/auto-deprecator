@@ -4,7 +4,7 @@ from importlib import import_module
 from warnings import warn
 
 
-def deprecate(expiry=None, current=None, relocate=None):
+def deprecate(expiry=None, current=None, relocate=None, version_module=None):
     """Deprecate
 
     This is a function decorator which
@@ -15,16 +15,19 @@ def deprecate(expiry=None, current=None, relocate=None):
       2. If the current version is same as or after the expiry version, by
          default, an exception is raised.
 
-    :param expiry: `str` The expiry version.
-    :param current: `str` The current version.
+    :param expiry: `str` The expiry version, e.g. 2.1.0.
+    :param current: `str` The current version. e.g. 2.0.0.
     :param relocate: `str` The relocated method or function name, which will
         be hinted if warning or exception is raised.
+    :param version_module: `str` The module name which includes the current
+        version (__version__).
     """
+
     def _deprecate(func):
         def wrapper(*args, **kwargs):
             # Check whether the function is deprecated
             is_deprecated = check_deprecation(
-                func=func, expiry=expiry, current=current,
+                expiry=expiry, current=current, version_module=version_module
             )
 
             # Throw exception if deprecation
@@ -47,36 +50,39 @@ def deprecate(expiry=None, current=None, relocate=None):
     return _deprecate
 
 
-def get_curr_version(func, current):
+def get_curr_version(current, version_module):
     if "DEPRECATE_VERSION" in environ:
         return environ["DEPRECATE_VERSION"]
+
+    assert (current is not None) or (version_module is not None), (
+        "Only the current version (%s) or the version module (%s) "
+        "should be specified"
+    ) % (current, version_module)
 
     if current:
         return current
 
-    module = ""
-    imported_module = func.__module__
+    try:
+        module = import_module(version_module, "__version__")
+    except ModuleNotFoundError:
+        raise RuntimeError(
+            'Cannot locate version module "%s"' % version_module
+        )
 
-    while imported_module:
-        tmp_module, _, imported_module = imported_module.partition(".")
-        module = module + "." + tmp_module if module else tmp_module
-        m = import_module(module, "__version__")
-        try:
-            return getattr(m, "__version__")
-        except AttributeError:
-            continue
-
-    raise RuntimeError(
-        (
-            'No version can be found in function "{func}" from all the '
-            'parent modules "{module}"'
-        ).format(func=func.__name__, module=func.__module__)
-    )
+    try:
+        return getattr(module, "__version__")
+    except AttributeError:
+        raise RuntimeError(
+            "Cannot find version (__version__) from the version module "
+            '"%s"' % version_module
+        )
 
 
-def check_deprecation(func=None, expiry=None, current=None):
+def check_deprecation(expiry=None, current=None, version_module=None):
     if expiry is not None:
-        current = get_curr_version(func, current)
+        current = get_curr_version(
+            current=current, version_module=version_module
+        )
 
         if current >= expiry:
             return True
