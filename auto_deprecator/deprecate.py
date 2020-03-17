@@ -4,7 +4,14 @@ from importlib import import_module
 from warnings import warn
 
 
-def deprecate(expiry=None, current=None, relocate=None, version_module=None):
+def deprecate(
+    expiry=None,
+    current=None,
+    relocate=None,
+    version_module=None,
+    error_handler=None,
+    warn_handler=None,
+):
     """Deprecate
 
     This is a function decorator which
@@ -21,6 +28,11 @@ def deprecate(expiry=None, current=None, relocate=None, version_module=None):
         be hinted if warning or exception is raised.
     :param version_module: `str` The module name which includes the current
         version (__version__).
+    :param error_handler: `Callable[msg]` The error handler with message
+        as the parameter. The default handler is to raise the runtime error.
+    :param warn_handler: `Callable[msg]` The warning handler with message
+        as the parameter. The default handler is to raise the deprecation
+        warning.
     """
 
     def _deprecate(func):
@@ -32,16 +44,25 @@ def deprecate(expiry=None, current=None, relocate=None, version_module=None):
 
             # Throw exception if deprecation
             if is_deprecated:
-                handle_deprecation(func=func, expiry=expiry, relocate=relocate)
+                handle_deprecation(
+                    handler=error_handler,
+                    func=func,
+                    expiry=expiry,
+                    relocate=relocate,
+                )
 
             # Run the function
             result = func(*args, **kwargs)
 
             # Alert the user that the function will be
             # deprecated
-            alert_future_deprecation(
-                func=func, expiry=expiry, relocate=relocate
-            )
+            if not is_deprecated:
+                alert_future_deprecation(
+                    handler=warn_handler,
+                    func=func,
+                    expiry=expiry,
+                    relocate=relocate,
+                )
 
             return result
 
@@ -90,7 +111,7 @@ def check_deprecation(expiry=None, current=None, version_module=None):
     return False
 
 
-def handle_deprecation(func, expiry=None, relocate=None):
+def handle_deprecation(handler, func, expiry=None, relocate=None):
     if expiry is None:
         return
 
@@ -101,15 +122,15 @@ def handle_deprecation(func, expiry=None, relocate=None):
     else:
         hints = ""
 
-    raise RuntimeError(
-        (
-            'Function "{func}" is deprecated since version {version}.'
-            "{hints}"
-        ).format(func=func.__name__, version=expiry, hints=hints)
-    )
+    msg = (
+        'Function "{func}" is deprecated since version {version}.' "{hints}"
+    ).format(func=func.__name__, version=expiry, hints=hints)
+
+    handler = handler or _default_deprecation_error_handler
+    handler(msg)
 
 
-def alert_future_deprecation(func, expiry=None, relocate=None):
+def alert_future_deprecation(handler, func, expiry=None, relocate=None):
     if expiry is None:
         version_msg = "soon"
     else:
@@ -122,9 +143,17 @@ def alert_future_deprecation(func, expiry=None, relocate=None):
     else:
         hints = ""
 
-    warn(
-        'Function "{func}" will be deprecated {version_msg}.{hints}'.format(
-            func=func.__name__, version_msg=version_msg, hints=hints
-        ),
-        DeprecationWarning,
+    msg = 'Function "{func}" will be deprecated {version_msg}.{hints}'.format(
+        func=func.__name__, version_msg=version_msg, hints=hints
     )
+
+    handler = handler or _default_deprecation_warn_handler
+    handler(msg)
+
+
+def _default_deprecation_error_handler(msg):
+    raise RuntimeError(msg)
+
+
+def _default_deprecation_warn_handler(msg):
+    warn(msg, DeprecationWarning)

@@ -198,3 +198,19 @@ help maintain the source code in a clean manner.
 
 Especially if the function is removed by the action `auto-deprecate`,
 the unused import will not be left in the module.
+
+Customize the deprecation handling
+==================================
+
+By default, the `deprecate` decorator raise `DeprecationWarning` for the future expiry and `RuntimeError` on the expiration. The behavior can be modified so as to fit in the infrastructure / production environment.
+
+For example, the `DeprecationWarning` can be replaced by a simple print out by injecting a callable function into the parameter `warn_handler`.
+
+.. code-block:: python
+
+  @deprecate(expiry='2.1.0', current='2.0.0', warn_handler=lambda msg: print(msg))
+  def compute_method():
+      return 'hello world'
+
+
+Same for injecting a callable function into the parameter `error_handler`, the behavior is replaced if the function is deprecated.
