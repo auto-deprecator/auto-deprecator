@@ -6,8 +6,8 @@ Auto deprecator
 .. image:: https://img.shields.io/pypi/v/auto_deprecator.svg
         :target: https://pypi.python.org/pypi/auto-deprecator
 
-.. image:: https://travis-ci.org/gavincyi/auto-deprecator.svg
-        :target: https://travis-ci.org/gavincyi/auto-deprecator
+.. image:: https://travis-ci.org/auto-deprecator/auto-deprecator.svg
+        :target: https://travis-ci.org/auto-deprecator/auto-deprecator
 
 .. image:: https://readthedocs.org/projects/auto-deprecator/badge/?version=latest
         :target: https://auto-deprecator.readthedocs.io/en/latest/?badge=latest
@@ -139,7 +139,7 @@ With the bash command "curl",
 
 .. code-block:: console
 
-  curl -L https://github.com/gavincyi/auto-deprecator/tarball/master | tar xz -C <target_directory> --wildcards "*/auto_deprecator" --strip-components=1
+  curl -L https://github.com/auto-deprecator/auto-deprecator/tarball/master | tar xz -C <target_directory> --wildcards "*/auto_deprecator" --strip-components=1
 
 
 the source code of auto-deprecator can be cloned into the
@@ -148,7 +148,7 @@ target directory, i.e. "test_py_project/utils" in the example
 .. code-block:: console
 
   touch test_py_project/utils/__init__.py
-  curl -L https://github.com/gavincyi/auto-deprecator/tarball/master | tar xz -C test_py_project/utils --wildcards "*/auto_deprecator" --strip-components=1
+  curl -L https://github.com/auto-deprecator/auto-deprecator/tarball/master | tar xz -C test_py_project/utils --wildcards "*/auto_deprecator" --strip-components=1
 
 
 Features
