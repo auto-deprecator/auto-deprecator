@@ -84,8 +84,8 @@ def get_curr_version(current, version_module):
         return current
 
     try:
-        module = import_module(version_module, "__version__")
-    except ModuleNotFoundError:
+        module = import_module(version_module, "")
+    except:
         raise RuntimeError(
             'Cannot locate version module "%s"' % version_module
         )
