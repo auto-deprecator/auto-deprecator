@@ -9,7 +9,7 @@ LOGGER = logging.getLogger(__name__)
     expiry="2.1.0",
     current="2.0.0",
     relocate="other_func",
-    warn_handler=lambda msg: LOGGER.warning(msg),
+    warn_handler=LOGGER.warning,
 )
 def warn_handler_replaced():
     pass
@@ -19,7 +19,7 @@ def warn_handler_replaced():
     expiry="2.1.0",
     current="2.2.0",
     relocate="other_func",
-    error_handler=lambda msg: LOGGER.warning(msg),
+    error_handler=LOGGER.warning,
 )
 def error_handler_replaced():
     pass

@@ -208,7 +208,7 @@ For example, the `DeprecationWarning` can be replaced by a simple print out by i
 
 .. code-block:: python
 
-  @deprecate(expiry='2.1.0', current='2.0.0', warn_handler=lambda msg: print(msg))
+  @deprecate(expiry='2.1.0', current='2.0.0', warn_handler=print)
   def compute_method():
       return 'hello world'
 
