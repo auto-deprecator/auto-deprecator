@@ -1,8 +1,22 @@
 import argparse
 import ast
+import logging
+from os import walk
 from os.path import isfile
 
-from auto_deprecator.deprecate import check_deprecation
+try:
+    from auto_deprecator.deprecate import check_deprecation
+except ImportError:
+    from os.path import dirname, join
+    from importlib.util import spec_from_file_location, module_from_spec
+    spec = spec_from_file_location(
+        'deprecate', join(dirname(__file__), '..', 'deprecate.py')
+    )
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    check_deprecation = module.check_deprecation
+
+LOGGER = logging.getLogger(__name__)
 
 
 def check_import_deprecator_exists(tree, last_lineno):
@@ -11,7 +25,8 @@ def check_import_deprecator_exists(tree, last_lineno):
     for index, body in enumerate(tree.body):
         if (
             isinstance(body, (ast.ImportFrom, ast.Import))
-            and body.module == "auto_deprecator"
+            and hasattr(body, "module")
+            and "auto_deprecator" in body.module
         ):
             start_lineno = body.lineno
 
@@ -88,7 +103,10 @@ def find_deprecated_lines(tree, current, begin_lineno, last_lineno):
         if deprecate_decorator is None:
             continue
 
-        keywords = {k.arg: k.value.s for k in deprecate_decorator.keywords}
+        keywords = {
+            k.arg: getattr(k.value, 's', None)
+            for k in deprecate_decorator.keywords
+        }
 
         expiry = (
             deprecate_decorator.args[0].value
@@ -126,6 +144,8 @@ def find_deprecated_lines(tree, current, begin_lineno, last_lineno):
 
 
 def deprecate_single_file(filename, current=None):
+    LOGGER.info('Deprecating the file %s', filename)
+
     # Read file stream
     filestream = open(filename, "r").readlines()
     tree = ast.parse("".join(filestream))
@@ -172,24 +192,44 @@ def deprecate_single_file(filename, current=None):
 
 
 def deprecate_directory(path, current):
-    raise NotImplementedError("Deprecate path does not support directory now")
+    for root, subdirs, files in walk(path):
+        LOGGER.debug('Walk through root %s with files %s', root, files)
+        for python_file in files:
+            if python_file[-3:] != '.py':
+                continue
+
+            python_file = join(root, python_file)
+            deprecate_single_file(python_file, current)
 
 
 def main():
     parser = argparse.ArgumentParser(
         description="Automatical removal of deprecated source code."
     )
-    parser.add_argument("PATH", type=str, help="The source code path.")
+    parser.add_argument(
+        "path", type=str, help="The source code path.")
     parser.add_argument(
         "--version", dest="current", type=str, help="Current package version."
     )
+    parser.add_argument(
+        "--debug", dest="debug", help='Debug mode', action='store_true',
+    )
     args = parser.parse_args()
+
+    # Set up logger
+    level = logging.DEBUG if args.debug else logging.INFO
+    logging.basicConfig(level=level, format='%(asctime)-15s %(message)s')
 
     # Get the argument values
     path = args.path
     current = args.current
+    assert current, "Current version is not provided"
 
     if isfile(path):
         deprecate_single_file(path, current)
     else:
         deprecate_directory(path, current)
+
+
+if __name__ == '__main__':
+    main()
