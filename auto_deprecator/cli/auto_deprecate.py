@@ -45,7 +45,8 @@ def check_body_deprecator_exists(body):
         return None
 
     deprecate_list = [
-        d for d in body.decorator_list if d.func.id == "deprecate"
+        d for d in body.decorator_list
+        if hasattr(d, 'func') and d.func.id == "deprecate"
     ]
 
     if len(deprecate_list) == 0:
