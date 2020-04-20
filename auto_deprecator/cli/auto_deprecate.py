@@ -4,7 +4,7 @@ from io import BytesIO
 import logging
 from os import walk
 from os.path import isfile
-from tokenize import tokenize
+from tokenize import tokenize, COMMENT
 
 try:
     from auto_deprecator.deprecate import check_deprecation
@@ -42,7 +42,7 @@ def check_import_deprecator_exists(tree, last_lineno):
     return import_deprecator_lines
 
 
-def get_body_deprecate_expiry(body, file_tokens=None):
+def get_body_deprecate_deprecator(body):
     if not hasattr(body, "decorator_list"):
         return None
 
@@ -59,20 +59,65 @@ def get_body_deprecate_expiry(body, file_tokens=None):
         'in the function "{func}"'.format(func=body.func.name)
     )
 
-    deprecate_decorator = deprecate_list[0]
+    return deprecate_list[0]
 
-    keywords = {
-        k.arg: getattr(k.value, 's', None)
-        for k in deprecate_decorator.keywords
-    }
 
-    expiry = (
-        deprecate_decorator.args[0].value
-        if deprecate_decorator.args
-        else keywords["expiry"]
+def get_deprecate_expiry_from_comment(
+        file_tokens, start_lineno, end_lineno):
+    """Get deprecate expiry from comment.
+
+    The comment should be like
+
+        # auto-deprecate: expiry=2.0.0
+
+    and located in the function.
+    """
+    for t_type, t_string, (srow, _), (erow, _), _ in file_tokens:
+        if t_type != COMMENT:
+            continue
+
+        if srow <= start_lineno or erow >= end_lineno:
+            continue
+
+        t_string = t_string.lstrip('# ')
+        if not t_string.startswith('auto-deprecate:'):
+            continue
+
+        expiry = t_string.replace('auto-deprecate:', '').strip(' ')
+        assert 'expiry=' in expiry, (
+            "Invalid auto-deprecate option (%s)" % expiry
+        )
+
+        expiry = expiry.replace('expiry=', '').strip(' ')
+
+        return expiry
+
+    return None
+
+
+def get_body_deprecate_expiry(
+        body, file_tokens, start_lineno, end_lineno):
+    deprecate_decorator = get_body_deprecate_deprecator(body)
+
+    if deprecate_decorator is not None:
+        keywords = {
+            k.arg: getattr(k.value, 's', None)
+            for k in deprecate_decorator.keywords
+        }
+
+        expiry = (
+            deprecate_decorator.args[0].value
+            if deprecate_decorator.args
+            else keywords["expiry"]
+        )
+
+        assert expiry is not None, "Expiry cannot be None"
+
+        return expiry
+
+    expiry = get_deprecate_expiry_from_comment(
+        file_tokens, start_lineno, end_lineno
     )
-
-    assert expiry is not None, "Expiry cannot be None"
 
     return expiry
 
@@ -83,7 +128,7 @@ def check_tree_deprecator_exists(tree):
             if check_tree_deprecator_exists(body):
                 return True
 
-        if get_body_deprecate_expiry(body, file_tokens=None):
+        if get_body_deprecate_deprecator(body):
             return True
 
     return False
@@ -118,7 +163,7 @@ def find_deprecated_lines(
                 deprecated_body.append(body)
 
         expiry = get_body_deprecate_expiry(
-            body, file_tokens
+            body, file_tokens, start_lineno, end_lineno
         )
 
         assert current is not None, "Current version must be provided"
@@ -128,8 +173,8 @@ def find_deprecated_lines(
         if not is_deprecated:
             continue
 
-        # Readjust the start lineno from the decorator
-        start_lineno = body.decorator_list[0].lineno
+        # # Readjust the start lineno from the decorator
+        # start_lineno = body.decorator_list[0].lineno
 
         deprecated_lines.append((start_lineno, end_lineno))
         deprecated_body.append(body)
@@ -152,7 +197,9 @@ def deprecate_single_file(filename, current=None):
     filestream = open(filename, "r").readlines()
     file_content = "".join(filestream)
     tree = ast.parse(file_content)
-    file_tokens = tokenize(BytesIO(file_content.encode('utf-8')).readline)
+    file_tokens = list(
+        tokenize(BytesIO(file_content.encode('utf-8')).readline)
+    )
 
     # Check whether deprecate is included
     deprecator_import_lines = check_import_deprecator_exists(
