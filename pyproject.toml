@@ -8,8 +8,8 @@ authors = [
 license = "MIT"
 readme = "README.md"
 python = "3"
-homepage = "https://github.com/gavincyi/auto-deprecator"
-repository = "https://github.com/gavincyi/auto-deprecator"
+homepage = "https://github.com/auto-deprecator/auto-deprecator"
+repository = "https://github.com/auto-deprecator/auto-deprecator"
 documentation = "https://github.com/MartinThoma/infer_pyproject"
 
 keywords = ["packaging", "dependency", "infer", "pyproject.toml"]
