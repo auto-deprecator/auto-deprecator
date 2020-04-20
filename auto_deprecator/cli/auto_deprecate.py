@@ -1,8 +1,10 @@
 import argparse
 import ast
+from io import BytesIO
 import logging
 from os import walk
 from os.path import isfile
+from tokenize import tokenize
 
 try:
     from auto_deprecator.deprecate import check_deprecation
@@ -40,7 +42,7 @@ def check_import_deprecator_exists(tree, last_lineno):
     return import_deprecator_lines
 
 
-def check_body_deprecator_exists(body):
+def get_body_deprecate_expiry(body, file_tokens=None):
     if not hasattr(body, "decorator_list"):
         return None
 
@@ -57,7 +59,22 @@ def check_body_deprecator_exists(body):
         'in the function "{func}"'.format(func=body.func.name)
     )
 
-    return deprecate_list[0]
+    deprecate_decorator = deprecate_list[0]
+
+    keywords = {
+        k.arg: getattr(k.value, 's', None)
+        for k in deprecate_decorator.keywords
+    }
+
+    expiry = (
+        deprecate_decorator.args[0].value
+        if deprecate_decorator.args
+        else keywords["expiry"]
+    )
+
+    assert expiry is not None, "Expiry cannot be None"
+
+    return expiry
 
 
 def check_tree_deprecator_exists(tree):
@@ -66,13 +83,14 @@ def check_tree_deprecator_exists(tree):
             if check_tree_deprecator_exists(body):
                 return True
 
-        if check_body_deprecator_exists(body):
+        if get_body_deprecate_expiry(body, file_tokens=None):
             return True
 
     return False
 
 
-def find_deprecated_lines(tree, current, begin_lineno, last_lineno):
+def find_deprecated_lines(
+        tree, current, begin_lineno, last_lineno, file_tokens):
     def get_function_lineno(body):
         if hasattr(body, "decorator_list") and len(body.decorator_list) > 0:
             return body.decorator_list[0].lineno
@@ -93,34 +111,17 @@ def find_deprecated_lines(tree, current, begin_lineno, last_lineno):
 
         if isinstance(body, ast.ClassDef):
             deprecated_lines += find_deprecated_lines(
-                body, current, start_lineno, last_lineno
+                body, current, start_lineno, last_lineno, file_tokens
             )
 
             if len(body.body) == 0:
                 deprecated_body.append(body)
 
-        deprecate_decorator = check_body_deprecator_exists(body)
-
-        if deprecate_decorator is None:
-            continue
-
-        keywords = {
-            k.arg: getattr(k.value, 's', None)
-            for k in deprecate_decorator.keywords
-        }
-
-        expiry = (
-            deprecate_decorator.args[0].value
-            if deprecate_decorator.args
-            else keywords["expiry"]
+        expiry = get_body_deprecate_expiry(
+            body, file_tokens
         )
 
-        if current is None:
-            current = (
-                deprecate_decorator.args[1].value
-                if len(deprecate_decorator.args) > 1
-                else keywords["current"]
-            )
+        assert current is not None, "Current version must be provided"
 
         is_deprecated = check_deprecation(expiry=expiry, current=current)
 
@@ -149,20 +150,19 @@ def deprecate_single_file(filename, current=None):
 
     # Read file stream
     filestream = open(filename, "r").readlines()
-    tree = ast.parse("".join(filestream))
+    file_content = "".join(filestream)
+    tree = ast.parse(file_content)
+    file_tokens = tokenize(BytesIO(file_content.encode('utf-8')).readline)
 
     # Check whether deprecate is included
     deprecator_import_lines = check_import_deprecator_exists(
         tree, len(filestream) + 1
     )
 
-    if not deprecator_import_lines:
-        return False
-
     # Store the deprecated funcion line numbers. The tuple
     # is combined by the start and end line index
     deprecated_lines = find_deprecated_lines(
-        tree, current, 1, len(filestream) + 1
+        tree, current, 1, len(filestream) + 1, file_tokens
     )
 
     if not deprecated_lines:
