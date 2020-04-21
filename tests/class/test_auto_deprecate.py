@@ -10,10 +10,10 @@ from .conftest import (
 )
 
 
-def test_auto_deprecate_single_file_2_1_0(dummy_class_file):
+def test_auto_deprecate_single_file_2_2_0(dummy_class_file):
     SingleFileAutoDeprecator(
         filename=dummy_class_file,
-        current="2.1.0"
+        current="2.2.0"
     ).run()
 
     filestream = open(dummy_class_file, "r").read()
@@ -27,10 +27,10 @@ def test_auto_deprecate_single_file_2_1_0(dummy_class_file):
     )
 
 
-def test_auto_deprecate_single_file_2_2_0(dummy_class_file):
+def test_auto_deprecate_single_file_2_3_0(dummy_class_file):
     SingleFileAutoDeprecator(
         filename=dummy_class_file,
-        current="2.2.0"
+        current="2.3.0"
     ).run()
 
     filestream = open(dummy_class_file, "r").read()
@@ -39,10 +39,10 @@ def test_auto_deprecate_single_file_2_2_0(dummy_class_file):
     )
 
 
-def test_auto_deprecate_single_file_2_3_0(dummy_class_file):
+def test_auto_deprecate_single_file_2_4_0(dummy_class_file):
     SingleFileAutoDeprecator(
         filename=dummy_class_file,
-        current="2.3.0"
+        current="2.4.0"
     ).run()
 
     filestream = open(dummy_class_file, "r").read()

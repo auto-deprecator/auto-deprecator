@@ -341,7 +341,7 @@ class SingleFileAutoDeprecator:
 
             stage = check_stage(expiry=expiry, current=current)
 
-            if stage == FunctionStage.WARNING:
+            if stage != FunctionStage.CLEANING:
                 continue
 
             deprecated_lines.append((start_lineno, end_lineno))
