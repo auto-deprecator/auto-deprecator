@@ -51,7 +51,7 @@ Add a decorator `deprecate` above the function like the below can manage the men
 
 When the user calls the methods or initializes the objects which will be deprecated 
 in the next version or on an expected date, the user should receive the warning of
-the future deprecation but get the return in success. The default warning handler is to throw a `DeprecationWarning` and the handle method can be customized in the section :ref:`Customize the deprecation handling`
+the future deprecation but get the return in success. The default warning handler is to throw a `DeprecationWarning` and the handle method can be customized in the section `Customize the deprecation handling`_
 
 .. code-block:: python
 
@@ -206,9 +206,8 @@ help maintain the source code in a clean manner.
 Especially if the function is removed by the action `auto-deprecate`,
 the unused import will not be left in the module.
 
-
 Customize the deprecation handling
-==================================
+##################################
 
 By default, the `deprecate` decorator raise `DeprecationWarning` for the future expiry and `RuntimeError` on the expiration. The behavior can be modified so as to fit in the infrastructure / production environment.
 
