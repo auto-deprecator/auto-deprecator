@@ -11,6 +11,9 @@ NORMAL_FUNCTION = """
 
 
 def normal_function():
+    \"\"\"Normal function.\"\"\"
+    # pylint: disable=nothing?
+    # This is just a normal comment.
     pass"""
 
 
@@ -35,6 +38,16 @@ DEPRECATE_FUNCTION_2_2_0 = """
 
 @deprecate(expiry="2.2.0", current="2.1.0")
 def deprecate_version_2_2_0():
+    pass"""
+
+
+DEPRECATE_FUNCTION_2_0_0_COMMENT = """
+
+
+def deprecate_version_2_0_0_comment():
+    \"\"\"Deprecate version 2.0.0.
+    \"\"\"
+    # auto-deprecate: expiry=2.0.0
     pass"""
 
 
