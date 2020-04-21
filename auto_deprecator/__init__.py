@@ -5,7 +5,7 @@ from io import BytesIO
 from importlib import import_module
 import logging
 from os import environ, walk
-from os.path import isfile
+from os.path import isfile, join
 from tokenize import tokenize, COMMENT
 from warnings import warn
 
