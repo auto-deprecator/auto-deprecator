@@ -52,6 +52,6 @@ setup(
     zip_safe=False,
     entry_points="""
         [console_scripts]
-        auto-deprecate = auto_deprecator.cli.auto_deprecate:main
+        auto-deprecate = auto_deprecator:main
     """,
 )
