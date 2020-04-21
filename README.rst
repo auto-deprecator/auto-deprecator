@@ -29,20 +29,29 @@ The library provides the full cycle to deprecate a function in the following way
 
 .. image:: https://github.com/auto-deprecator/auto-deprecator/blob/develop/docs/cycle.png
 
-1. Alert the users the deprecation time
-#######################################
+For example, a function called `old_hello_world` should be deprecated in the version 2.0.0, while the current version of the library is 1.0.0.
 
-When the user calls the methods or initializes the objects which will be deprecated 
-in the next version or on an expected date, the user should receive the warning of
-the future deprecation but get the return in success.
+Add a decorator `deprecate` above the function like the below can manage to follow the mentioned cycle.
 
 .. code-block:: python
 
   from auto_deprecator import deprecate
 
+
   @deprecate(expiry='2.0.0', current='1.9.0')
   def old_hello_world():
       return print("Hello world!")
+
+  
+  def hello_world():
+      return print("Hello world again!")
+
+1. Alert the users the deprecation time
+#######################################
+
+When the user calls the methods or initializes the objects which will be deprecated 
+in the next version or on an expected date, the user should receive the warning of
+the future deprecation but get the return in success. The default warning handler is to throw a `DeprecationWarning` and the handle method can be customized in CustomizeDeprecationHandler_.
 
 .. code-block:: python
 
@@ -81,23 +90,23 @@ version.
 
 .. code-block:: console
 
-  (bash) auto-deprecate hello_world.py --version 2.0.0
-  (bash) git diff
+  $ auto-deprecate hello_world.py --version 2.0.0
 
-  diff --git a/hello_world.py b/hello_world.py
-  index 201e546..ec41365 100644
-  --- a/hello_world.py
-  +++ b/hello_world.py
-  @@ -1,8 +1,2 @@
-  -from auto_deprecator import deprecate
-  -
-   def hello_world():
-       return print("Hello world!")
-  -
-  -@deprecate(expiry='2.0.0')
-  -def old_hello_world():
-  -    return print("Hello world!")
-  
+The command removes the function `old_hello_world` from the source codes as the expiry version is 2.0.0. Also, if the source file does not require to import the `auto-deprecate` anymore (as all the functions have already been deprecated), the import line will be removed as well.
+
+.. code-block:: console
+
+  $ git difftool -y -x sdiff
+  from auto_deprecator import deprecate                         <
+                                                                <
+                                                                <
+  @deprecate(expiry='2.0.0', current='1.9.0')                   <
+  def old_hello_world():                                        <
+      return print("Hello world!")                              <
+                                                                <
+                                                                <
+  def hello_world():                                              def hello_world():
+      return print("Hello world again!")                        /     return print("Hello world again!")
 
 
 Installation
@@ -139,16 +148,14 @@ With the bash command "curl",
 
 .. code-block:: console
 
-  curl -L https://github.com/auto-deprecator/auto-deprecator/tarball/master | tar xz -C <target_directory> --wildcards "*/auto_deprecator" --strip-components=1
-
+  curl https://raw.githubusercontent.com/auto-deprecator/auto-deprecator/develop/auto_deprecator/__init__.py -o $DEST
 
 the source code of auto-deprecator can be cloned into the
 target directory, i.e. "test_py_project/utils" in the example
 
 .. code-block:: console
 
-  touch test_py_project/utils/__init__.py
-  curl -L https://github.com/auto-deprecator/auto-deprecator/tarball/master | tar xz -C test_py_project/utils --wildcards "*/auto_deprecator" --strip-components=1
+  curl https://raw.githubusercontent.com/auto-deprecator/auto-deprecator/develop/auto_deprecator/__init__.py -o test_py_project/utils/auto_deprecator.py
 
 
 Features
@@ -198,6 +205,8 @@ help maintain the source code in a clean manner.
 
 Especially if the function is removed by the action `auto-deprecate`,
 the unused import will not be left in the module.
+
+.. _CustomizeDeprecationHandler
 
 Customize the deprecation handling
 ==================================
