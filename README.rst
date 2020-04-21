@@ -31,7 +31,7 @@ The library provides the full cycle to deprecate a function in the following way
 
 For example, a function called `old_hello_world` should be deprecated in the version 2.0.0, while the current version of the library is 1.0.0.
 
-Add a decorator `deprecate` above the function like the below can manage to follow the mentioned cycle.
+Add a decorator `deprecate` above the function like the below can manage the mentioned deprecation cycle.
 
 .. code-block:: python
 
@@ -51,7 +51,7 @@ Add a decorator `deprecate` above the function like the below can manage to foll
 
 When the user calls the methods or initializes the objects which will be deprecated 
 in the next version or on an expected date, the user should receive the warning of
-the future deprecation but get the return in success. The default warning handler is to throw a `DeprecationWarning` and the handle method can be customized in CustomizeDeprecationHandler_.
+the future deprecation but get the return in success. The default warning handler is to throw a `DeprecationWarning` and the handle method can be customized in the section :ref:`Customize the deprecation handling`
 
 .. code-block:: python
 
@@ -206,7 +206,6 @@ help maintain the source code in a clean manner.
 Especially if the function is removed by the action `auto-deprecate`,
 the unused import will not be left in the module.
 
-.. _CustomizeDeprecationHandler
 
 Customize the deprecation handling
 ==================================
