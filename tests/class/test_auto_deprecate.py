@@ -1,4 +1,4 @@
-from auto_deprecator.cli.auto_deprecate import deprecate_single_file
+from auto_deprecator import SingleFileAutoDeprecator
 
 from .conftest import (
     IMPORT_STATEMENT,
@@ -11,7 +11,10 @@ from .conftest import (
 
 
 def test_auto_deprecate_single_file_2_1_0(dummy_class_file):
-    deprecate_single_file(filename=dummy_class_file, current="2.1.0")
+    SingleFileAutoDeprecator(
+        filename=dummy_class_file,
+        current="2.1.0"
+    ).run()
 
     filestream = open(dummy_class_file, "r").read()
     assert filestream == (
@@ -25,7 +28,10 @@ def test_auto_deprecate_single_file_2_1_0(dummy_class_file):
 
 
 def test_auto_deprecate_single_file_2_2_0(dummy_class_file):
-    deprecate_single_file(filename=dummy_class_file, current="2.2.0")
+    SingleFileAutoDeprecator(
+        filename=dummy_class_file,
+        current="2.2.0"
+    ).run()
 
     filestream = open(dummy_class_file, "r").read()
     assert filestream == (
@@ -34,7 +40,10 @@ def test_auto_deprecate_single_file_2_2_0(dummy_class_file):
 
 
 def test_auto_deprecate_single_file_2_3_0(dummy_class_file):
-    deprecate_single_file(filename=dummy_class_file, current="2.3.0")
+    SingleFileAutoDeprecator(
+        filename=dummy_class_file,
+        current="2.3.0"
+    ).run()
 
     filestream = open(dummy_class_file, "r").read()
     assert filestream == (CLASS_DELARATION + INIT_METHOD)

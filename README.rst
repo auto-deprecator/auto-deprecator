@@ -27,7 +27,7 @@ How does it work?
 
 The library provides the full cycle to deprecate a function in the following ways
 
-.. image:: docs/cycle.png
+.. image:: https://github.com/auto-deprecator/auto-deprecator/blob/develop/docs/cycle.png
 
 1. Alert the users the deprecation time
 #######################################

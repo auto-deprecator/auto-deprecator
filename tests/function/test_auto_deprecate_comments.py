@@ -1,6 +1,6 @@
 import pytest
 
-from auto_deprecator.cli.auto_deprecate import deprecate_single_file
+from auto_deprecator import SingleFileAutoDeprecator
 
 from .conftest import (
     NORMAL_FUNCTION, DEPRECATE_FUNCTION_2_0_0_COMMENT
@@ -19,7 +19,10 @@ def function_file_str():
 
 
 def test_auto_deprecate_single_file_2_1_0(function_file):
-    deprecate_single_file(filename=function_file, current="2.1.0")
+    SingleFileAutoDeprecator(
+        filename=function_file,
+        current="2.1.0"
+    ).run()
 
     filestream = open(function_file, "r").read()
     assert filestream == (
