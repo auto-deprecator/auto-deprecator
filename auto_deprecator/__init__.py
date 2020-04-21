@@ -12,6 +12,14 @@ from warnings import warn
 LOGGER = logging.getLogger(__name__)
 
 
+class FunctionStage:
+    """Function stage."""
+
+    WARNING = 0
+    EXPIRED = 1
+    CLEANING = 2
+
+
 def deprecate(
     expiry=None,
     current=None,
@@ -46,12 +54,12 @@ def deprecate(
     def _deprecate(func):
         def wrapper(*args, **kwargs):
             # Check whether the function is deprecated
-            is_deprecated = check_deprecation(
+            stage = check_stage(
                 expiry=expiry, current=current, version_module=version_module
             )
 
             # Throw exception if deprecation
-            if is_deprecated:
+            if stage != FunctionStage.WARNING:
                 handle_deprecation(
                     handler=error_handler,
                     func=func,
@@ -64,7 +72,7 @@ def deprecate(
 
             # Alert the user that the function will be
             # deprecated
-            if not is_deprecated:
+            if stage == FunctionStage.WARNING:
                 alert_future_deprecation(
                     handler=warn_handler,
                     func=func,
@@ -107,16 +115,20 @@ def get_curr_version(current, version_module):
         )
 
 
-def check_deprecation(expiry=None, current=None, version_module=None):
+def check_stage(expiry=None, current=None, version_module=None):
     if expiry is not None:
         current = get_curr_version(
             current=current, version_module=version_module
         )
 
-        if current >= expiry:
-            return True
+        if current > expiry:
+            return FunctionStage.CLEANING
+        elif current == expiry:
+            return FunctionStage.EXPIRED
+        else:
+            return FunctionStage.WARNING
 
-    return False
+    return FunctionStage.WARNING
 
 
 def handle_deprecation(handler, func, expiry=None, relocate=None):
@@ -327,13 +339,10 @@ class SingleFileAutoDeprecator:
 
             assert current is not None, "Current version must be provided"
 
-            is_deprecated = check_deprecation(expiry=expiry, current=current)
+            stage = check_stage(expiry=expiry, current=current)
 
-            if not is_deprecated:
+            if stage == FunctionStage.WARNING:
                 continue
-
-            # # Readjust the start lineno from the decorator
-            # start_lineno = body.decorator_list[0].lineno
 
             deprecated_lines.append((start_lineno, end_lineno))
             deprecated_body.append(body)
