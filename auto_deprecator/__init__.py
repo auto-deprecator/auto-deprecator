@@ -9,6 +9,8 @@ from os.path import isfile, join
 from tokenize import tokenize, COMMENT
 from warnings import warn
 
+__version__ = '2020.4.0'
+
 LOGGER = logging.getLogger(__name__)
 
 
