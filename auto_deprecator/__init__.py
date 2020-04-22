@@ -191,7 +191,11 @@ class SingleFileAutoDeprecator:
         """
         self._filename = filename
         self._current = current
-        self._source_tokens = None
+        self._deprecate_tokens = []
+
+    @staticmethod
+    def is_nestable(body):
+        return isinstance(body, (ast.FunctionDef, ast.ClassDef))
 
     @classmethod
     def check_import_deprecator_exists(cls, tree, last_lineno):
@@ -215,6 +219,18 @@ class SingleFileAutoDeprecator:
         return import_deprecator_lines
 
     @classmethod
+    def check_tree_deprecator_exists(cls, tree):
+        for body in tree.body:
+            if cls.is_nestable(body):
+                if cls.check_tree_deprecator_exists(body):
+                    return True
+
+            if cls.get_body_deprecate_deprecator(body):
+                return True
+
+        return False
+
+    @classmethod
     def get_body_deprecate_deprecator(cls, body):
         if not hasattr(body, "decorator_list"):
             return None
@@ -234,22 +250,30 @@ class SingleFileAutoDeprecator:
 
         return deprecate_list[0]
 
-    def get_deprecate_expiry_from_comment(
-            self, start_lineno, end_lineno):
-        """Get deprecate expiry from comment.
+    @classmethod
+    def get_function_lineno(cls, body):
+        if hasattr(body, "decorator_list") and len(body.decorator_list) > 0:
+            return body.decorator_list[0].lineno
+        else:
+            return body.lineno
 
-        The comment should be like
+    @classmethod
+    def get_deprecate_tokens(cls, file_content):
+        """Get deprecate tokens.
 
-            # auto-deprecate: expiry=2.0.0
-
-        and located in the function.
+        :returns: `List[(int, int, str)]` List of tuples of which
+            the first and second is the start and end of the line
+            number, and the third is the expiry version.
         """
-        for (t_type, t_string,
-                 (srow, _), (erow, _), _) in self._source_tokens:
-            if t_type != COMMENT:
-                continue
+        source_tokens = list(
+            tokenize(BytesIO(file_content.encode('utf-8')).readline)
+        )
 
-            if srow <= start_lineno or erow >= end_lineno:
+        deprecate_tokens = []
+
+        for (t_type, t_string,
+                 (srow, _), (erow, _), _) in source_tokens:
+            if t_type != COMMENT:
                 continue
 
             t_string = t_string.lstrip('# ')
@@ -263,12 +287,63 @@ class SingleFileAutoDeprecator:
 
             expiry = expiry.replace('expiry=', '').strip(' ')
 
-            return expiry
+            deprecate_tokens.append((srow, erow, expiry))
+
+        return deprecate_tokens
+
+    def get_deprecate_expiry_from_comment(
+            self, body, start_lineno, end_lineno):
+        """Get deprecate expiry from comment.
+
+        The comment should be like
+
+            # auto-deprecate: expiry=2.0.0
+
+        and located in the function in the first place, after
+        the docstring.
+
+        For example,
+
+            def abc():
+                \"\"\"Abc.\"\"\"
+                # auto-deprecate: expiry=2.0.0
+                pass
+
+        is valid, but not
+
+            def abc()
+                \"\"\"Abc.\"\"\"
+                print('hello world')
+                # auto-deprecate: expiry=2.0.0
+                pass
+
+        """
+        if hasattr(body, 'body'):
+            for inner_body in body.body:
+                end_lineno = self.get_function_lineno(inner_body)
+                if self.is_nestable(inner_body):
+                    break
+
+        check_expiry = [
+            expiry
+            for (srow, erow, expiry) in self._deprecate_tokens
+            if srow >= start_lineno and erow < end_lineno
+        ]
+
+        if check_expiry:
+            return check_expiry[0]
 
         return None
 
     def get_body_deprecate_expiry(
             self, body, start_lineno, end_lineno):
+        """Get the expiry version of the body.
+
+        :returns: `str` Expiry version.
+        """
+        if not isinstance(body, (ast.ClassDef, ast.FunctionDef)):
+            return None
+
         deprecate_decorator = self.get_body_deprecate_deprecator(body)
 
         if deprecate_decorator is not None:
@@ -288,50 +363,26 @@ class SingleFileAutoDeprecator:
             return expiry
 
         expiry = self.get_deprecate_expiry_from_comment(
-            start_lineno, end_lineno
+            body, start_lineno, end_lineno
         )
 
         return expiry
 
-    @classmethod
-    def check_tree_deprecator_exists(cls, tree):
-        for body in tree.body:
-            if isinstance(body, ast.ClassDef):
-                if cls.check_tree_deprecator_exists(body):
-                    return True
-
-            if cls.get_body_deprecate_deprecator(body):
-                return True
-
-        return False
-
     def find_deprecated_lines(
             self, tree, current, begin_lineno, last_lineno):
-        def get_function_lineno(body):
-            if hasattr(body, "decorator_list") and len(body.decorator_list) > 0:
-                return body.decorator_list[0].lineno
-            else:
-                return body.lineno
-
         deprecated_lines = []
         deprecated_body = []
 
         for index, body in enumerate(tree.body):
             # Python 3.8 lineno is on the function rather than the decorator
-            start_lineno = get_function_lineno(body)
+            start_lineno = self.get_function_lineno(body)
 
             if index != len(tree.body) - 1:
-                end_lineno = get_function_lineno(tree.body[index + 1])
+                end_lineno = self.get_function_lineno(
+                    tree.body[index + 1]
+                )
             else:
                 end_lineno = last_lineno
-
-            if isinstance(body, ast.ClassDef):
-                deprecated_lines += self.find_deprecated_lines(
-                    body, current, start_lineno, last_lineno
-                )
-
-                if len(body.body) == 0:
-                    deprecated_body.append(body)
 
             expiry = self.get_body_deprecate_expiry(
                 body, start_lineno, end_lineno
@@ -340,6 +391,16 @@ class SingleFileAutoDeprecator:
             assert current is not None, "Current version must be provided"
 
             stage = check_stage(expiry=expiry, current=current)
+
+            # Loop into the body only if it can contain inner
+            # function / inner class
+            if self.is_nestable(body):
+                deprecated_lines += self.find_deprecated_lines(
+                    body, current, start_lineno, last_lineno
+                )
+
+                if len(body.body) == 0:
+                    deprecated_body.append(body)
 
             if stage != FunctionStage.CLEANING:
                 continue
@@ -364,8 +425,10 @@ class SingleFileAutoDeprecator:
         filestream = open(self._filename, "r").readlines()
         file_content = "".join(filestream)
         tree = ast.parse(file_content)
-        self._source_tokens = list(
-            tokenize(BytesIO(file_content.encode('utf-8')).readline)
+
+        # Get the deprecate tokens
+        self._deprecate_tokens = self.get_deprecate_tokens(
+            file_content
         )
 
         # Check whether deprecate is included

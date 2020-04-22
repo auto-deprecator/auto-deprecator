@@ -41,16 +41,6 @@ def deprecate_version_2_2_0():
     pass"""
 
 
-DEPRECATE_FUNCTION_2_0_0_COMMENT = """
-
-
-def deprecate_version_2_0_0_comment():
-    \"\"\"Deprecate version 2.0.0.
-    \"\"\"
-    # auto-deprecate: expiry=2.0.0
-    pass"""
-
-
 @pytest.fixture(scope="session")
 def function_file_str():
     return (
