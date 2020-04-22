@@ -153,6 +153,18 @@ The command removes the function `old_hello_world` from the source codes as the 
       return print("Hello world again!")                        /     return print("Hello world again!")
 
 
+The function with a comment line to state the expiry version is
+another way to inform the script `auto-deprecate` to remove the
+part of the code when it is expired. For example,
+
+.. code-block:: python
+
+    def old_hello_world():
+        # auto-deprecate: expiry=2.0.0
+        print('hello world')
+
+For the details of the comment hints, please refer to the section `Auto deprecation hints in comments`_.
+
 Installation
 ------------
 
@@ -265,3 +277,29 @@ For example, the `DeprecationWarning` can be replaced by a simple print out by i
 
 
 Same for injecting a callable function into the parameter `error_handler`, the behavior is replaced if the function is deprecated.
+
+
+Auto deprecation hints in comments
+##################################
+
+The auto deprecation script handles not only the expiry parts wrapped by the decorator, but also those stated with comments.
+The comment line in the format `# auto-deprecate: expiry=<version>`
+in the scope of the function or class is treated same as the
+decorator hints `@deprecate(expiry="version", ...)`.
+
+For example, the below function will be removed
+
+.. code-block:: python
+
+    # hello_world.py
+
+
+    def old_hello_world():
+        # auto-deprecate: expiry=2.0.0
+        print('hello world')
+
+when the script is called with current version greater than 2.0.0
+
+.. code-block:: console
+
+    $ auto-deprecate hello_world.py --version 2.1.0
