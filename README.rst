@@ -46,8 +46,15 @@ Add a decorator `deprecate` above the function like the below can manage the men
   def hello_world():
       return print("Hello world again!")
 
-1. Alert the users the deprecation time
-#######################################
+
+You can also suggest the replacing function / method. For details, please refer to the section `Provide hints to users`_.
+
+
+Warning Stage
+#############
+
+Alert the users the deprecation time
+====================================
 
 When the user calls the methods or initializes the objects which will be deprecated 
 in the next version or on an expected date, the user should receive the warning of
@@ -60,8 +67,8 @@ the future deprecation but get the return in success. The default warning handle
   DeprecationWarning: The function "old_hello_world" will be deprecated on version 2.0.0
 
 
-2. Test as if deprecated
-########################
+Test as if deprecated
+=====================
 
 Before the component is deprecated, unit / integration testing should be run
 to ensure the deprecation does not break the existing flow. Pass in the environment
@@ -81,8 +88,45 @@ variables in the testing to simulate that the version is deployed.
   RuntimeError: The function "old_hello_world" is deprecated in version 2.0.0
  
 
-3. Automatic deprecation before release
-#######################################
+Expired Stage
+#############
+
+If the current version has reached the function expiry version, 
+calling the deprecated function will trigger the exception by default.
+
+
+.. code-block:: python
+
+  from auto_deprecator import deprecate
+
+  __version__ = '2.0.0'
+
+
+  @deprecate(expiry='2.0.0', current=__version__)
+  def old_hello_world():
+      return print("Hello world!")
+
+
+For example, the above function is called by the downstream
+process `after-hello-world`. The owner of the process is not
+aware that the function should be deprecated and replaced by
+another function, and the process is crashed by the default
+exception. To work around the exception in the production,
+before a proper fix is provided, the environment variable
+`DEPRECATED_VERSION` can be injected in the downstream process.
+
+
+.. code-block:: bash
+
+  DEPRECATED_VERSION=1.9 after-hello-world
+
+
+Cleaning Stage
+##############
+
+
+Automatic deprecation before release
+====================================
 
 Deprecating the functions is no longer a manual work. Every time before release,
 run the command `auto-deprecate` to remove the functions deprecated in the coming
