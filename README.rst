@@ -27,22 +27,38 @@ How does it work?
 
 The library provides the full cycle to deprecate a function in the following ways
 
-.. image:: docs/cycle.png
+.. image:: https://github.com/auto-deprecator/auto-deprecator/blob/develop/docs/cycle.png
 
-1. Alert the users the deprecation time
-#######################################
+For example, a function called ``old_hello_world`` should be deprecated in the version 2.0.0, while the current version of the library is 1.0.0.
 
-When the user calls the methods or initializes the objects which will be deprecated 
-in the next version or on an expected date, the user should receive the warning of
-the future deprecation but get the return in success.
+Add a decorator ``deprecate`` above the function like the below can manage the mentioned deprecation cycle.
 
 .. code-block:: python
 
   from auto_deprecator import deprecate
 
+
   @deprecate(expiry='2.0.0', current='1.9.0')
   def old_hello_world():
       return print("Hello world!")
+
+  
+  def hello_world():
+      return print("Hello world again!")
+
+
+You can also suggest the replacing function / method. For details, please refer to the section `Provide hints to users`_.
+
+
+Warning Stage
+#############
+
+Alert the users the deprecation time
+====================================
+
+When the user calls the methods or initializes the objects which will be deprecated 
+in the next version or on an expected date, the user should receive the warning of
+the future deprecation but get the return in success. The default warning handler is to throw a ``DeprecationWarning`` and the handle method can be customized in the section `Customize the deprecation handling`_
 
 .. code-block:: python
 
@@ -51,8 +67,8 @@ the future deprecation but get the return in success.
   DeprecationWarning: The function "old_hello_world" will be deprecated on version 2.0.0
 
 
-2. Test as if deprecated
-########################
+Test as if deprecated
+=====================
 
 Before the component is deprecated, unit / integration testing should be run
 to ensure the deprecation does not break the existing flow. Pass in the environment
@@ -72,33 +88,82 @@ variables in the testing to simulate that the version is deployed.
   RuntimeError: The function "old_hello_world" is deprecated in version 2.0.0
  
 
-3. Automatic deprecation before release
-#######################################
+Expired Stage
+#############
+
+If the current version has reached the function expiry version, 
+calling the deprecated function will trigger the exception by default.
+
+
+.. code-block:: python
+
+  from auto_deprecator import deprecate
+
+  __version__ = '2.0.0'
+
+
+  @deprecate(expiry='2.0.0', current=__version__)
+  def old_hello_world():
+      return print("Hello world!")
+
+
+For example, the above function is called by the downstream
+process ``after-hello-world``. The owner of the process is not
+aware that the function should be deprecated and replaced by
+another function, and the process is crashed by the default
+exception. To work around the exception in the production,
+before a proper fix is provided, the environment variable
+``DEPRECATED_VERSION`` can be injected in the downstream process.
+
+
+.. code-block:: bash
+
+  DEPRECATED_VERSION=1.9 after-hello-world
+
+
+Cleaning Stage
+##############
+
+
+Automatic deprecation before release
+====================================
 
 Deprecating the functions is no longer a manual work. Every time before release,
-run the command `auto-deprecate` to remove the functions deprecated in the coming
+run the command ``auto-deprecate`` to remove the functions deprecated in the coming
 version.
 
 .. code-block:: console
 
-  (bash) auto-deprecate hello_world.py --version 2.0.0
-  (bash) git diff
+  $ auto-deprecate hello_world.py --version 2.0.0
 
-  diff --git a/hello_world.py b/hello_world.py
-  index 201e546..ec41365 100644
-  --- a/hello_world.py
-  +++ b/hello_world.py
-  @@ -1,8 +1,2 @@
-  -from auto_deprecator import deprecate
-  -
-   def hello_world():
-       return print("Hello world!")
-  -
-  -@deprecate(expiry='2.0.0')
-  -def old_hello_world():
-  -    return print("Hello world!")
-  
+The command removes the function ``old_hello_world`` from the source codes as the expiry version is 2.0.0. Also, if the source file does not require to import the ``auto-deprecate`` anymore (as all the functions have already been deprecated), the import line will be removed as well.
 
+.. code-block:: console
+
+  $ git difftool -y -x sdiff
+  from auto_deprecator import deprecate                         <
+                                                                <
+                                                                <
+  @deprecate(expiry='2.0.0', current='1.9.0')                   <
+  def old_hello_world():                                        <
+      return print("Hello world!")                              <
+                                                                <
+                                                                <
+  def hello_world():                                              def hello_world():
+      return print("Hello world again!")                        /     return print("Hello world again!")
+
+
+The function with a comment line to state the expiry version is
+another way to inform the script ``auto-deprecate`` to remove the
+part of the code when it is expired. For example,
+
+.. code-block:: python
+
+    def old_hello_world():
+        # auto-deprecate: expiry=2.0.0
+        print('hello world')
+
+For the details of the comment hints, please refer to the section `Auto deprecation hints in comments`_.
 
 Installation
 ------------
@@ -139,16 +204,14 @@ With the bash command "curl",
 
 .. code-block:: console
 
-  curl -L https://github.com/auto-deprecator/auto-deprecator/tarball/master | tar xz -C <target_directory> --wildcards "*/auto_deprecator" --strip-components=1
-
+  curl https://raw.githubusercontent.com/auto-deprecator/auto-deprecator/develop/auto_deprecator/__init__.py -o $DEST
 
 the source code of auto-deprecator can be cloned into the
 target directory, i.e. "test_py_project/utils" in the example
 
 .. code-block:: console
 
-  touch test_py_project/utils/__init__.py
-  curl -L https://github.com/auto-deprecator/auto-deprecator/tarball/master | tar xz -C test_py_project/utils --wildcards "*/auto_deprecator" --strip-components=1
+  curl https://raw.githubusercontent.com/auto-deprecator/auto-deprecator/develop/auto_deprecator/__init__.py -o test_py_project/utils/auto_deprecator.py
 
 
 Features
@@ -177,7 +240,7 @@ the relocated method.
 Import current version from module name
 #######################################
 
-Instead of importing the version (`__version__`) in the module,
+Instead of importing the version (``__version__``) in the module,
 
 .. code-block:: python
 
@@ -196,15 +259,15 @@ help maintain the source code in a clean manner.
   def compute_method():
       return 'hello world'
 
-Especially if the function is removed by the action `auto-deprecate`,
+Especially if the function is removed by the action ``auto-deprecate``,
 the unused import will not be left in the module.
 
 Customize the deprecation handling
-==================================
+##################################
 
-By default, the `deprecate` decorator raise `DeprecationWarning` for the future expiry and `RuntimeError` on the expiration. The behavior can be modified so as to fit in the infrastructure / production environment.
+By default, the ``deprecate`` decorator raise ``DeprecationWarning`` for the future expiry and ``RuntimeError`` on the expiration. The behavior can be modified so as to fit in the infrastructure / production environment.
 
-For example, the `DeprecationWarning` can be replaced by a simple print out by injecting a callable function into the parameter `warn_handler`.
+For example, the ``DeprecationWarning`` can be replaced by a simple print out by injecting a callable function into the parameter ``warn_handler``.
 
 .. code-block:: python
 
@@ -213,4 +276,30 @@ For example, the `DeprecationWarning` can be replaced by a simple print out by i
       return 'hello world'
 
 
-Same for injecting a callable function into the parameter `error_handler`, the behavior is replaced if the function is deprecated.
+Same for injecting a callable function into the parameter ``error_handler``, the behavior is replaced if the function is deprecated.
+
+
+Auto deprecation hints in comments
+##################################
+
+The auto deprecation script handles not only the expiry parts wrapped by the decorator, but also those stated with comments.
+The comment line in the format ``# auto-deprecate: expiry=<version>``
+in the scope of the function or class is treated same as the
+decorator hints ``@deprecate(expiry="version", ...)``.
+
+For example, the below function will be removed
+
+.. code-block:: python
+
+    # hello_world.py
+
+
+    def old_hello_world():
+        # auto-deprecate: expiry=2.0.0
+        print('hello world')
+
+when the script is called with current version greater than 2.0.0
+
+.. code-block:: console
+
+    $ auto-deprecate hello_world.py --version 2.1.0

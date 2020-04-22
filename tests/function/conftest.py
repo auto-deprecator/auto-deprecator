@@ -11,6 +11,9 @@ NORMAL_FUNCTION = """
 
 
 def normal_function():
+    \"\"\"Normal function.\"\"\"
+    # pylint: disable=nothing?
+    # This is just a normal comment.
     pass"""
 
 
