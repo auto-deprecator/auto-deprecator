@@ -27,6 +27,7 @@ def deprecate_version_2_1_0_only_inner():
 
     print('bye bye')"""
 
+
 @pytest.fixture
 def function_file_str():
     return (

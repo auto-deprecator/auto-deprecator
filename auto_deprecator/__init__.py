@@ -272,7 +272,7 @@ class SingleFileAutoDeprecator:
         deprecate_tokens = []
 
         for (t_type, t_string,
-                 (srow, _), (erow, _), _) in source_tokens:
+             (srow, _), (erow, _), _) in source_tokens:
             if t_type != COMMENT:
                 continue
 
