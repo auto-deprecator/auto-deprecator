@@ -27,7 +27,7 @@ How does it work?
 
 The library provides the full cycle to deprecate a function in the following ways
 
-.. image:: https://github.com/auto-deprecator/auto-deprecator/blob/develop/docs/cycle.png
+.. image:: https://raw.githubusercontent.com/auto-deprecator/auto-deprecator/master/docs/cycle.png
 
 For example, a function called ``old_hello_world`` should be deprecated in the version 2.0.0, while the current version of the library is 1.0.0.
 
