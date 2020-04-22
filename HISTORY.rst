@@ -2,6 +2,12 @@
 History
 =======
 
+2020.4.0 (2020-04-23)
+---------------------
+
+* Support deprecation hints in comments
+* Simplify the project architecture
+
 2020.3.0 (2020-04-11)
 ---------------------
 
