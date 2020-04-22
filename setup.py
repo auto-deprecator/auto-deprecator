@@ -48,7 +48,7 @@ setup(
     tests_require=test_requirements,
     extras_require={"test": test_requirements,},
     url="https://github.com/auto-deprecator/auto-deprecator",
-    version="2020.3.0",
+    version="2020.4.0",
     zip_safe=False,
     entry_points="""
         [console_scripts]
