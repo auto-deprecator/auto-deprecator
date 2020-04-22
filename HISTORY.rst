@@ -15,7 +15,7 @@ History
 * Support customizing the deprecation handler
 
 2020.2.0 (2020-02-11)
---------------------
+---------------------
 
 * Introduce parameter version_module in the deprecate decorator, to
   import the version dynamically
