@@ -207,6 +207,7 @@ class SingleFileAutoDeprecator:
             if (
                 isinstance(body, (ast.ImportFrom, ast.Import))
                 and hasattr(body, "module")
+                and body.module
                 and "auto_deprecator" in body.module
             ):
                 start_lineno = body.lineno
@@ -234,12 +235,25 @@ class SingleFileAutoDeprecator:
 
     @classmethod
     def get_body_deprecate_deprecator(cls, body):
+        def has_deprecate_decorator(decorator):
+            if not hasattr(decorator, 'func'):
+                return False
+
+            if (hasattr(decorator.func, 'id') and
+                    decorator.func.id == 'deprecate'):
+                return True
+            elif (hasattr(decorator.func, 'attr') and
+                    decorator.func.attr == 'deprecate'):
+                return True
+
+            return False
+
         if not hasattr(body, "decorator_list"):
             return None
 
         deprecate_list = [
             d for d in body.decorator_list
-            if hasattr(d, 'func') and d.func.id == "deprecate"
+            if has_deprecate_decorator(d)
         ]
 
         if len(deprecate_list) == 0:
