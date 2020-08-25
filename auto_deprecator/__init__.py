@@ -3,6 +3,7 @@ import argparse
 import ast
 from io import BytesIO
 from importlib import import_module
+from functools import wraps
 import logging
 from os import environ, walk
 from os.path import isfile, join
@@ -52,8 +53,8 @@ def deprecate(
         as the parameter. The default handler is to raise the deprecation
         warning.
     """
-
     def _deprecate(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             # Check whether the function is deprecated
             stage = check_stage(
