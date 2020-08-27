@@ -49,6 +49,8 @@ Add a decorator ``deprecate`` above the function like the below can manage the m
 
 You can also suggest the replacing function / method. For details, please refer to the section `Provide hints to users`_.
 
+For further examples, you can have a look on the project [auto-deprecate-example](https://github.com/auto-deprecator/auto-deprecator-example).
+
 
 Warning Stage
 #############
@@ -82,7 +84,7 @@ variables in the testing to simulate that the version is deployed.
    
 .. code-block:: console
 
-  (bash) DEPRECATED_VERSION=2.0.0 hello-world-app
+  (bash) DEPRECATE_VERSION=2.0.0 hello-world-app
   Traceback (most recent call last):
    ...
   RuntimeError: The function "old_hello_world" is deprecated in version 2.0.0
@@ -113,12 +115,12 @@ aware that the function should be deprecated and replaced by
 another function, and the process is crashed by the default
 exception. To work around the exception in the production,
 before a proper fix is provided, the environment variable
-``DEPRECATED_VERSION`` can be injected in the downstream process.
+``DEPRECATE_VERSION`` can be injected in the downstream process.
 
 
 .. code-block:: bash
 
-  DEPRECATED_VERSION=1.9 after-hello-world
+  DEPRECATE_VERSION=1.9 after-hello-world
 
 
 Cleaning Stage
@@ -189,8 +191,6 @@ code into your project instead.
 For example, your Python project contains a module called
 "utils" to maintain all the utility functions.
 
-.. code-block:: console
-
   .
   ├── setup.py
   └── test_py_project
@@ -201,7 +201,6 @@ For example, your Python project contains a module called
           └── __init__.py
 
 With the bash command "curl",
-
 .. code-block:: console
 
   curl https://raw.githubusercontent.com/auto-deprecator/auto-deprecator/develop/auto_deprecator/__init__.py -o $DEST
